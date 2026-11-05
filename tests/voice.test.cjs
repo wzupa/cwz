@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_4.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_1.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;

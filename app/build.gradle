@@ -17,7 +17,7 @@ android {
     sourceSets { main { assets.srcDir layout.buildDirectory.dir('generated/cwzAssets') } }
 }
 tasks.register('copyCwzHtml', Copy) {
-    from rootProject.file('CWZ_v6_4.html')
+    from rootProject.file('CWZ_v6_6_1.html')
     into layout.buildDirectory.dir('generated/cwzAssets')
     rename { 'index.html' }
 }

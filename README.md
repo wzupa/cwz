@@ -1,7 +1,15 @@
 # CWZ per Android
 
-App Android offline basata su `CWZ_v6_4.html`, mantenuto come sorgente unico
+App Android offline basata su `CWZ_v6_6_1.html`, mantenuto come sorgente unico
 e copiato negli asset durante la compilazione. Il file HTML e il progetto Android vengono aggiornati insieme.
+
+## Versioni HTML
+
+- [HTML attuale 6.6.1](CWZ_v6_6_1.html): include allenamento vocale e livello adattivo.
+- [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
+
+Il progetto Android usa soltanto il file della versione attuale. La copia stabile
+resta separata e non viene aggiornata automaticamente con le nuove funzioni.
 
 ## Installazione sul telefono
 
