@@ -5,12 +5,12 @@ e copiato negli asset durante la compilazione. Il file HTML e il progetto Androi
 
 ## Installazione sul telefono
 
-1. Scaricare [CWZ-6.4.3-debug.apk](downloads/CWZ-6.4.3-debug.apk) sul telefono e aprirlo.
+1. Scaricare [CWZ-6.4.4-debug.apk](downloads/CWZ-6.4.4-debug.apk) sul telefono e aprirlo.
 2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
    applicazioni da questa origine, quindi scegliere **Installa**.
 3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
 
-La versione 6.4.3 corregge lo scorrimento con la tastiera e riserva lo spazio alle barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
+CWZ è un’applicazione autonoma per l’allenamento Morse offline. La versione 6.4.4 rimuove il controllo sperimentale inutilizzato e i riferimenti a confronti con altri software; mantiene le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
 Si installa come aggiornamento della 6.4, senza disinstallare l'app.
 
 Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
