@@ -26,9 +26,12 @@ public class MainActivity extends Activity {
     private static final int EXPORT = 10;
     private WebView web;
     private String pendingExport;
+    private VoiceRecognition voice;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        voice = new VoiceRecognition(this, event -> web.evaluateJavascript(
+                "window.CWZVoice && window.CWZVoice.onNativeEvent(" + event + ");", null));
         int barColor = Color.rgb(16, 37, 59);
         getWindow().setStatusBarColor(barColor);
         getWindow().setNavigationBarColor(barColor);
@@ -86,10 +89,15 @@ public class MainActivity extends Activity {
     }
 
     private class ExportBridge {
+        @JavascriptInterface public String speechInfo() { return voice.info(); }
+        @JavascriptInterface public void startSpeech(int id, String mode, String language) {
+            runOnUiThread(() -> voice.start(id, mode, language));
+        }
+        @JavascriptInterface public void cancelSpeech() { runOnUiThread(() -> voice.cancel()); }
         @JavascriptInterface public void save(String name, String content, String type) {
             runOnUiThread(() -> {
                 if (pendingExport != null) return;
-                if (!(name.equals("cwz-storico.json") || name.equals("cwz-risultati.csv"))) return;
+                if (!(name.equals("cwz-storico.json") || name.equals("cwz-risultati.csv") || name.equals("cwz-vocale.json"))) return;
                 pendingExport = content;
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -125,7 +133,8 @@ public class MainActivity extends Activity {
         super.onSaveInstanceState(state);
     }
     @Override protected void onPause() {
-        web.evaluateJavascript("if(typeof pause==='function'){pause();}", null);
+        web.evaluateJavascript("if(typeof pause==='function'){pause();} window.CWZVoice && window.CWZVoice.pause();", null);
+        voice.cancel();
         web.onPause();
         super.onPause();
     }
@@ -134,8 +143,14 @@ public class MainActivity extends Activity {
         if (web.canGoBack()) web.goBack(); else super.onBackPressed();
     }
     @Override protected void onDestroy() {
+        voice.cancel();
         web.removeJavascriptInterface("CwzAndroid");
         web.destroy();
         super.onDestroy();
+    }
+
+    @Override public void onRequestPermissionsResult(int request, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(request, permissions, results);
+        voice.onPermissionResult(request, results);
     }
 }
