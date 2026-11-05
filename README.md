@@ -5,12 +5,12 @@ e copiato negli asset durante la compilazione. Il file HTML e il progetto Androi
 
 ## Installazione sul telefono
 
-1. Scaricare [CWZ-6.5.1-debug.apk](downloads/CWZ-6.5.1-debug.apk) sul telefono e aprirlo.
+1. Scaricare [CWZ-6.6.0-debug.apk](downloads/CWZ-6.6.0-debug.apk) sul telefono e aprirlo.
 2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
    applicazioni da questa origine, quindi scegliere **Installa**.
 3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
 
-CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.5.1 compatta le statistiche vocali con tempi medi per carattere e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
+CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.0 aggiunge l’allenamento vocale adattivo con il 60% di estrazioni uniformi e il 40% ponderate, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
 Si installa come aggiornamento della 6.4, senza disinstallare l'app.
 
 Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
@@ -105,3 +105,18 @@ fallback da tastiera. Non misurano la qualità del servizio vocale reale.
 Sul telefono verificare permesso concesso/negato, lingua installata, modalità
 locale/sistema, parole NATO, ripetizione, passaggio in secondo piano e assenza
 di ascolto durante la riproduzione Morse.
+
+## Selezione adattiva
+
+La modalità vocale propone Adattiva (predefinita) e Casuale uniforme. La scelta
+è salvata sul dispositivo e cambia soltanto il sorteggio nella pagina vocale.
+Il 60% delle estrazioni resta uniforme, il 40% usa pesi tra 1× e 3×.
+Servono almeno 5 tentativi validi alla stessa coppia di velocità WPM. Si usano
+gli ultimi 30 tentativi per carattere, con decadimento 0,92 per ogni tentativo
+precedente. Il peso combina errori (1,2), confusione più frequente (0,4) e
+lentezza relativa (0,4), con crescita graduale della confidenza fino a 14 prove.
+La lentezza confronta il tempo medio recente con la mediana delle medie dei
+caratteri selezionati con almeno 3 tempi validi. I salti senza aiuti contano come
+errori; risposte da tastiera, correzioni vocali, aiuti, ripetizioni, interruzioni
+e tentativi con problemi di riconoscimento sono esclusi. I pesi si aggiornano
+a ogni nuovo carattere e sono visibili nella tabella. Lo storico resta intatto.

@@ -123,7 +123,7 @@ test('compact statistics: arithmetic mean, valid sample counts, confusion matrix
     });
     await page.reload();
     const cells = await page.locator('#voiceLetters tbody tr').first().locator('td').allTextContents();
-    assert.deepEqual(cells, ['K', '4/5', '3.00 s', '3']);
+    assert.deepEqual(cells, ['K', '4/5', '3.00 s', '3', '1.00×']);
     assert((await page.locator('#voiceSummary').textContent()).includes('Tempo medio: 3.00 s'));
     const rows = page.locator('#voiceMatrix tbody tr');
     assert.deepEqual(await rows.nth(0).locator('td').allTextContents(), ['4', '1', '·']);
