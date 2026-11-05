@@ -11,8 +11,8 @@ android {
         applicationId 'it.wzupa.cwz'
         minSdk 26
         targetSdk 35
-        versionCode 60400
-        versionName '6.4'
+        versionCode 60401
+        versionName '6.4.1'
     }
     sourceSets { main { assets.srcDir layout.buildDirectory.dir('generated/cwzAssets') } }
 }
