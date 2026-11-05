@@ -1,0 +1,24 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'it.wzupa.cwz'
+    compileSdk 35
+    buildToolsVersion '35.0.0'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    defaultConfig {
+        applicationId 'it.wzupa.cwz'
+        minSdk 26
+        targetSdk 35
+        versionCode 60400
+        versionName '6.4'
+    }
+    sourceSets { main { assets.srcDir layout.buildDirectory.dir('generated/cwzAssets') } }
+}
+tasks.register('copyCwzHtml', Copy) {
+    from rootProject.file('CWZ_v6_4.html')
+    into layout.buildDirectory.dir('generated/cwzAssets')
+    rename { 'index.html' }
+}
+tasks.named('preBuild').configure { dependsOn 'copyCwzHtml' }
