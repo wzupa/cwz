@@ -5,12 +5,12 @@ e copiato negli asset durante la compilazione. Il file HTML e il progetto Androi
 
 ## Installazione sul telefono
 
-1. Scaricare [CWZ-6.6.0-debug.apk](downloads/CWZ-6.6.0-debug.apk) sul telefono e aprirlo.
+1. Scaricare [CWZ-6.6.1-debug.apk](downloads/CWZ-6.6.1-debug.apk) sul telefono e aprirlo.
 2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
    applicazioni da questa origine, quindi scegliere **Installa**.
 3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
 
-CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.0 aggiunge l’allenamento vocale adattivo con il 60% di estrazioni uniformi e il 40% ponderate, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
+CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.1 aggiunge l’allenamento vocale adattivo con un cursore configurabile fra selezione casuale e adattiva, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
 Si installa come aggiornamento della 6.4, senza disinstallare l'app.
 
 Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
@@ -108,9 +108,11 @@ di ascolto durante la riproduzione Morse.
 
 ## Selezione adattiva
 
-La modalità vocale propone Adattiva (predefinita) e Casuale uniforme. La scelta
-è salvata sul dispositivo e cambia soltanto il sorteggio nella pagina vocale.
-Il 60% delle estrazioni resta uniforme, il 40% usa pesi tra 1× e 3×.
+Il cursore Livello adattivo va da 0% a 100%, a passi del 10%. A 0% tutti i
+caratteri hanno la stessa probabilità; a 100% si usano sempre i pesi. Il valore
+iniziale è 40% adattivo e 60% casuale. La scelta è salvata sul dispositivo e si
+può modificare durante la sessione, con effetto dal carattere successivo.
+I pesi restano tra 1× e 3×.
 Servono almeno 5 tentativi validi alla stessa coppia di velocità WPM. Si usano
 gli ultimi 30 tentativi per carattere, con decadimento 0,92 per ogni tentativo
 precedente. Il peso combina errori (1,2), confusione più frequente (0,4) e

@@ -65,11 +65,17 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
   const { page, context } = await openPage();
   try {
     assert.equal(await page.locator('#voicePool').count(), 0);
+    assert.equal(await page.locator('#voiceAdaptive').inputValue(), '40');
+    await page.locator('#voiceAdaptive').evaluate(input => { input.value = '0'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+    assert.equal(await page.locator('#voiceMix').textContent(), '100% casuale · 0% adattivo');
     assert.equal(await page.locator('#voiceEngine').inputValue(), 'local');
     await page.locator('#voiceTest').click(); await listening(page); await nativeResult(page, 'Chilo');
     assert((await page.locator('#voiceStatus').innerText()).includes('→ K'));
     assert.equal((await history(page)).length, 0);
     await page.locator('#voiceStart').click(); await listening(page);
+    assert.equal(await page.locator('#voiceAdaptive').isEnabled(), true);
+    await page.locator('#voiceAdaptive').evaluate(input => { input.value = '100'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+    assert.equal(await page.locator('#voiceMix').textContent(), '0% casuale · 100% adattivo');
     assert.equal(await page.locator('#voiceCode').isVisible(), false);
     assert.equal(await page.locator('#voiceCode').textContent(), '');
     await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
@@ -104,6 +110,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
     assert.equal((await d).suggestedFilename(), 'cwz-vocale.json');
     await page.reload(); assert.equal((await history(page)).length, 3);
+    assert.equal(await page.locator('#voiceAdaptive').inputValue(), '100');
     assert((await page.locator('#voiceSummary').innerText()).includes('Risposte: 3'));
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }

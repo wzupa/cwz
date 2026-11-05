@@ -43,3 +43,11 @@ test('60% uniform branch, 40% weighted branch and selectable uniform mode', () =
   // 0.60 * 0.50 + 0.40 * 0.75 = 0.60, rather than 0.75.
   assert(Math.abs(count / 100000 - 0.6) < 0.01);
 });
+test('user-selected share controls the draw, including both endpoints', () => {
+  const pool = ['E', 'R'], weights = new Map([['E', 1], ['R', 3]]);
+  const values = [0, 0.4];
+  assert.equal(adaptive.draw(pool, weights, 1, () => values.shift()), 'R');
+  assert.equal(adaptive.draw(pool, weights, 0, () => 0.4), 'E');
+  const mixed = [0.49, 0.4];
+  assert.equal(adaptive.draw(pool, weights, 0.5, () => mixed.shift()), 'E');
+});
