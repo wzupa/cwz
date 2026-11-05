@@ -3,7 +3,14 @@ package it.wzupa.cwz;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.Color;
+import android.graphics.Insets;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.widget.FrameLayout;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -22,12 +29,40 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        int barColor = Color.rgb(16, 37, 59);
+        getWindow().setStatusBarColor(barColor);
+        getWindow().setNavigationBarColor(barColor);
+        getWindow().getDecorView().setSystemUiVisibility(0);
+        FrameLayout content = new FrameLayout(this);
+        content.setBackgroundColor(barColor);
         web = new WebView(this);
-        setContentView(web);
-        web.setOnApplyWindowInsetsListener((view, insets) -> {
-            view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                    insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
-            return insets;
+        content.addView(web, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(content);
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().setDecorFitsSystemWindows(false);
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) controller.setSystemBarsAppearance(0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+            // Reserve space outside the scrollable WebView, so content cannot
+            // scroll over system icons or behind the on-screen keyboard.
+            content.setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets bars = insets.getInsets(WindowInsets.Type.systemBars()
+                        | WindowInsets.Type.displayCutout());
+                Insets keyboard = insets.getInsets(WindowInsets.Type.ime());
+                view.setPadding(bars.left, bars.top, bars.right,
+                        Math.max(bars.bottom, keyboard.bottom));
+                return WindowInsets.CONSUMED;
+            });
+            content.requestApplyInsets();
+        }
+        web.addOnLayoutChangeListener((view, left, top, right, bottom,
+                oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (bottom - top != oldBottom - oldTop || right - left != oldRight - oldLeft) {
+                web.post(() -> web.evaluateJavascript(
+                        "if(typeof ensureActiveCellVisible==='function'){ensureActiveCellVisible();}", null));
+            }
         });
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
