@@ -72,6 +72,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     await page.locator('#voiceStart').click(); await listening(page);
     assert.equal(await page.locator('#voiceCode').isVisible(), false);
     assert.equal(await page.locator('#voiceCode').textContent(), '');
+    await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
     await nativeResult(page, 'Kilo'); await page.locator('#voiceConfirm').click();
     let rows = await history(page);
     assert.equal(rows[0].expected, 'K'); assert.equal(rows[0].correct, true);
@@ -104,6 +105,33 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert.equal((await d).suggestedFilename(), 'cwz-vocale.json');
     await page.reload(); assert.equal((await history(page)).length, 3);
     assert((await page.locator('#voiceSummary').innerText()).includes('Risposte: 3'));
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
+test('compact statistics: arithmetic mean, valid sample counts, confusion matrix and collapsed details', async () => {
+  const { page, context } = await openPage();
+  try {
+    await page.evaluate(() => {
+      const base = { expected: 'K', answer: 'K', correct: true, source: 'voice', help: false, repeats: 0 };
+      localStorage.setItem('cwz-voice-history-v1', JSON.stringify([
+        ...[1000, 2000, 6000].map(responseMs => ({ ...base, responseMs })),
+        { ...base, answer: 'M', correct: false, responseMs: 500 },
+        { ...base, help: true, responseMs: 9000 },
+        { ...base, expected: 'M', answer: '', correct: false, source: 'skipped', responseMs: null }
+      ]));
+    });
+    await page.reload();
+    const cells = await page.locator('#voiceLetters tbody tr').first().locator('td').allTextContents();
+    assert.deepEqual(cells, ['K', '4/5', '3.00 s', '3']);
+    assert((await page.locator('#voiceSummary').textContent()).includes('Tempo medio: 3.00 s'));
+    const rows = page.locator('#voiceMatrix tbody tr');
+    assert.deepEqual(await rows.nth(0).locator('td').allTextContents(), ['4', '1', '·']);
+    assert.deepEqual(await rows.nth(1).locator('td').allTextContents(), ['·', '·', '1']);
+    assert.equal(await page.locator('#voiceRecent').isVisible(), false);
+    await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
+    assert.equal(await page.locator('#voiceRecent').isVisible(), true);
+    assert(!/\d+\.\d+ s/.test(await page.locator('#voiceRecent').textContent()));
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
 });

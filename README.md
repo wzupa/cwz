@@ -5,12 +5,12 @@ e copiato negli asset durante la compilazione. Il file HTML e il progetto Androi
 
 ## Installazione sul telefono
 
-1. Scaricare [CWZ-6.5.0-debug.apk](downloads/CWZ-6.5.0-debug.apk) sul telefono e aprirlo.
+1. Scaricare [CWZ-6.5.1-debug.apk](downloads/CWZ-6.5.1-debug.apk) sul telefono e aprirlo.
 2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
    applicazioni da questa origine, quindi scegliere **Installa**.
 3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
 
-CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.5.0 aggiunge la pagina Allenamento vocale e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
+CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.5.1 compatta le statistiche vocali con tempi medi per carattere e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
 Si installa come aggiornamento della 6.4, senza disinstallare l'app.
 
 Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
@@ -58,7 +58,7 @@ microfono. Se il riconoscimento non è disponibile, la pagina resta utilizzabile
 da tastiera. Qualità, lingue e funzionamento offline dipendono dal dispositivo.
 
 Le statistiche vocali sono separate dagli esercizi a gruppi: correttezza,
-confusioni, ripetizioni, aiuti, correzioni della trascrizione e tempi mediani,
+confusioni, ripetizioni, aiuti, correzioni della trascrizione e tempi medi,
 anche per carattere. Il tempo è indicativo, dalla fine del primo suono al
 rilevamento dell'inizio del parlato; esclude la trascrizione finale. Sono escluse
 dai tempi le risposte con aiuti, ripetizioni, interruzioni, tentativi vocali
