@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_1.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_2.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -29,6 +29,7 @@ async function openPage(kind = 'native', pool = ['K']) {
     window.cancelCount = 0;
     if (kind === 'native') {
       window.CwzAndroid = {
+        setScreenAwake: enabled => { window.screenAwake = enabled; },
         speechInfo: () => JSON.stringify({ available: true, local: true, system: true }),
         cancelSpeech: () => window.cancelCount++,
         startSpeech: (id, mode, language) => {
@@ -73,6 +74,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert((await page.locator('#voiceStatus').innerText()).includes('→ K'));
     assert.equal((await history(page)).length, 0);
     await page.locator('#voiceStart').click(); await listening(page);
+    assert.equal(await page.evaluate(() => window.screenAwake), true);
     assert.equal(await page.locator('#voiceAdaptive').isEnabled(), true);
     await page.locator('#voiceAdaptive').evaluate(input => { input.value = '100'; input.dispatchEvent(new Event('input', { bubbles: true })); });
     assert.equal(await page.locator('#voiceMix').textContent(), '0% casuale · 100% adattivo');
@@ -85,7 +87,10 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert.equal(rows[0].source, 'voice'); assert.equal(rows[0].help, false);
     assert(rows[0].responseMs >= 150);
     // Pause during feedback must not allow the same answer to be recorded twice.
-    await page.locator('#voicePause').click(); await page.locator('#voiceResume').click(); await listening(page);
+    await page.locator('#voicePause').click();
+    assert.equal(await page.evaluate(() => window.screenAwake), false);
+    await page.locator('#voiceResume').click(); await listening(page);
+    assert.equal(await page.evaluate(() => window.screenAwake), true);
     await nativeResult(page, 'Ripeti'); await listening(page);
     await nativeResult(page, 'parola sconosciuta');
     assert.equal((await history(page)).length, 1);
@@ -99,6 +104,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert.equal(rows[1].recognitionRetries, 1); assert.equal(rows[1].responseMs, null);
     await listening(page); assert.equal(await page.locator('#voiceCode').isVisible(), false);
     await page.getByRole('link', { name: 'Impostazioni CW', exact: true }).first().click();
+    assert.equal(await page.evaluate(() => window.screenAwake), false);
     assert(await page.evaluate(() => window.cancelCount) > 0);
     await page.locator('#chars').getByRole('button', { name: 'K', exact: true }).click();
     await page.locator('#chars').getByRole('button', { name: 'R', exact: true }).click();
@@ -107,11 +113,38 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     await nativeResult(page, 'Romeo'); await page.locator('#voiceConfirm').click();
     rows = await history(page); assert.equal(rows[2].expected, 'R'); assert.equal(rows[2].correct, true);
     await page.locator('#voiceEnd').click();
+    assert.equal(await page.evaluate(() => window.screenAwake), false);
     const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
     assert.equal((await d).suggestedFilename(), 'cwz-vocale.json');
     await page.reload(); assert.equal((await history(page)).length, 3);
     assert.equal(await page.locator('#voiceAdaptive').inputValue(), '100');
     assert((await page.locator('#voiceSummary').innerText()).includes('Risposte: 3'));
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
+test('browser wake lock: pending lock is released after pause and an acquired lock after session end', async () => {
+  const { page, context } = await openPage('manual', ['A']);
+  try {
+    await page.addInitScript(() => {
+      window.wakeRequests = 0; window.wakeReleases = 0;
+      Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: {
+        request: () => { window.wakeRequests++; return new Promise(resolve => {
+          window.resolveWake = () => resolve({ addEventListener() {}, release() { window.wakeReleases++; return Promise.resolve(); } });
+        }); }
+      } });
+    });
+    await page.reload(); await page.locator('#voiceStart').click();
+    assert.equal(await page.evaluate(() => window.wakeRequests), 1);
+    await page.locator('#voicePause').click();
+    await page.evaluate(() => window.resolveWake());
+    await page.waitForFunction(() => window.wakeReleases === 1);
+    await page.locator('#voiceResume').click();
+    assert.equal(await page.evaluate(() => window.wakeRequests), 2);
+    await page.evaluate(() => window.resolveWake());
+    await page.waitForFunction(() => document.getElementById('voiceAwake').textContent.startsWith('Schermo mantenuto'));
+    await page.locator('#voiceEnd').click();
+    await page.waitForFunction(() => window.wakeReleases === 2);
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
 });

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private String pendingExport;
     private VoiceRecognition voice;
+    private boolean foreground;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -89,6 +91,12 @@ public class MainActivity extends Activity {
     }
 
     private class ExportBridge {
+        @JavascriptInterface public void setScreenAwake(boolean enabled) {
+            runOnUiThread(() -> {
+                if (enabled && foreground) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            });
+        }
         @JavascriptInterface public String speechInfo() { return voice.info(); }
         @JavascriptInterface public void startSpeech(int id, String mode, String language) {
             runOnUiThread(() -> voice.start(id, mode, language));
@@ -133,16 +141,20 @@ public class MainActivity extends Activity {
         super.onSaveInstanceState(state);
     }
     @Override protected void onPause() {
+        foreground = false;
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         web.evaluateJavascript("if(typeof pause==='function'){pause();} window.CWZVoice && window.CWZVoice.pause();", null);
         voice.cancel();
         web.onPause();
         super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); if (web != null) web.onResume(); }
+    @Override protected void onResume() { super.onResume(); foreground = true; if (web != null) web.onResume(); }
     @Override public void onBackPressed() {
         if (web.canGoBack()) web.goBack(); else super.onBackPressed();
     }
     @Override protected void onDestroy() {
+        foreground = false;
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         voice.cancel();
         web.removeJavascriptInterface("CwzAndroid");
         web.destroy();
