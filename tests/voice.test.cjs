@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_2.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_3.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -114,9 +114,12 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     rows = await history(page); assert.equal(rows[2].expected, 'R'); assert.equal(rows[2].correct, true);
     await page.locator('#voiceEnd').click();
     assert.equal(await page.evaluate(() => window.screenAwake), false);
+    assert((await page.locator('#voiceSessionState').textContent()).includes('Terminata prima della fine'));
+    assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
     const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
     assert.equal((await d).suggestedFilename(), 'cwz-vocale.json');
     await page.reload(); assert.equal((await history(page)).length, 3);
+    assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
     assert.equal(await page.locator('#voiceAdaptive').inputValue(), '100');
     assert((await page.locator('#voiceSummary').innerText()).includes('Risposte: 3'));
     assert.deepEqual(page.errors, []);
@@ -176,6 +179,30 @@ test('compact statistics: arithmetic mean, valid sample counts, confusion matrix
   } finally { await context.close(); }
 });
 
+test('last session ranks its own confusions and does not include older errors', async () => {
+  const { page, context } = await openPage();
+  try {
+    await page.evaluate(() => {
+      const rows = [
+        ...Array(8).fill({ session: 'old', expected: 'Z', answer: 'X', correct: false, source: 'typed' }),
+        ...Array(2).fill({ session: 'last', expected: 'R', answer: 'K', correct: false, source: 'typed' }),
+        { session: 'last', expected: 'T', answer: 'E', correct: false, source: 'typed' },
+        { session: 'last', expected: 'R', answer: 'R', correct: true, source: 'typed' }
+      ];
+      localStorage.setItem('cwz-voice-history-v1', JSON.stringify(rows));
+      localStorage.setItem('cwz-voice-last-session-v1', JSON.stringify({ id: 'last', planned: 4, completed: true }));
+    });
+    await page.reload();
+    assert((await page.locator('#voiceSessionScore').textContent()).includes('1/4 corrette (25%)'));
+    assert.equal(await page.locator('#voiceSessionErrors').textContent(), 'Confusioni più frequenti: R → K ×2 · T → E ×1');
+    assert((await page.locator('#voiceSessionWeak').textContent()).includes('R (2/3)'));
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('#voiceClear').click();
+    assert.equal(await page.locator('#voiceSessionSummary').isVisible(), false);
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
 test('browser adapter: top hypothesis, service failure, manual fallback, no background listening', { timeout: 30000 }, async () => {
   const { page, context } = await openPage('browser', ['?']);
   try {
@@ -202,7 +229,11 @@ test('unsupported browser: manual session completes and preserves existing keybo
   const { page, context } = await openPage('manual', ['A']);
   try {
     assert.equal(await page.locator('#voiceEngine').inputValue(), 'manual');
-    await page.evaluate(() => localStorage.setItem('cwz-history-v1', JSON.stringify([{ id: 'existing', groups: ['A'], answers: [['A']] }])));
+    await page.evaluate(() => {
+      localStorage.setItem('cwz-history-v1', JSON.stringify([{ id: 'existing', groups: ['A'], answers: [['A']] }]));
+      localStorage.setItem('cwz-voice-history-v1', JSON.stringify([{ id: 'old', session: 'old-session', expected: 'Z', answer: 'X', correct: false, source: 'typed' }]));
+    });
+    await page.reload();
     await page.locator('#voiceStart').click();
     for (let i = 0; i < 10; i++) {
       await page.locator('#voiceAnswer').waitFor({ state: 'visible' });
@@ -211,8 +242,13 @@ test('unsupported browser: manual session completes and preserves existing keybo
       await page.locator('#voiceAnswer').fill('Alfa'); await page.locator('#voiceConfirm').click();
     }
     await page.waitForFunction(() => document.getElementById('voiceStatus').textContent.includes('Sessione completata'));
-    const rows = await history(page); assert.equal(rows.length, 10);
-    assert(rows.every(r => r.expected === 'A' && r.correct && r.responseMs === null));
+    const rows = await history(page); assert.equal(rows.length, 11);
+    assert(rows.slice(1).every(r => r.expected === 'A' && r.correct && r.responseMs === null));
+    assert((await page.locator('#voiceSessionScore').textContent()).includes('10/10 corrette (100%)'));
+    assert(!(await page.locator('#voiceSessionErrors').textContent()).includes('Z'));
+    assert((await page.locator('#voiceSummary').textContent()).includes('Risposte: 11'));
+    await page.reload();
+    assert((await page.locator('#voiceSessionScore').textContent()).includes('10/10 corrette (100%)'));
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('cwz-history-v1'))[0].id), 'existing');
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }

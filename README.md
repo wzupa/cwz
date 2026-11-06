@@ -1,11 +1,11 @@
 # CWZ per Android
 
-App Android offline basata su `CWZ_v6_6_2.html`, mantenuto come sorgente unico
+App Android offline basata su `CWZ_v6_6_3.html`, mantenuto come sorgente unico
 e copiato negli asset durante la compilazione. Il file HTML e il progetto Android vengono aggiornati insieme.
 
 ## Versioni HTML
 
-- [HTML attuale 6.6.2](CWZ_v6_6_2.html): include allenamento vocale e livello adattivo.
+- [HTML attuale 6.6.3](CWZ_v6_6_3.html): include allenamento vocale e livello adattivo.
 - [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
 
 Il progetto Android usa soltanto il file della versione attuale. La copia stabile
@@ -13,12 +13,12 @@ resta separata e non viene aggiornata automaticamente con le nuove funzioni.
 
 ## Installazione sul telefono
 
-1. Scaricare [CWZ-6.6.2-debug.apk](downloads/CWZ-6.6.2-debug.apk) sul telefono e aprirlo.
+1. Scaricare [CWZ-6.6.3-debug.apk](downloads/CWZ-6.6.3-debug.apk) sul telefono e aprirlo.
 2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
    applicazioni da questa origine, quindi scegliere **Installa**.
 3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
 
-CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.2 mantiene lo schermo acceso durante l’allenamento vocale, conservando il cursore configurabile fra selezione casuale e adattiva, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
+CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.3 aggiunge il riepilogo dell’ultima sessione e mantiene lo schermo acceso durante l’allenamento vocale, conservando il cursore configurabile fra selezione casuale e adattiva, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
 Si installa come aggiornamento della 6.4, senza disinstallare l'app.
 
 Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
@@ -131,7 +131,7 @@ errori; risposte da tastiera, correzioni vocali, aiuti, ripetizioni, interruzion
 e tentativi con problemi di riconoscimento sono esclusi. I pesi si aggiornano
 a ogni nuovo carattere e sono visibili nella tabella. Lo storico resta intatto.
 
-## Schermo durante l’allenamento vocale (6.6.2)
+## Schermo durante l’allenamento vocale (6.6.3)
 
 L’APK mantiene lo schermo acceso durante la sessione vocale e la prova microfono.
 Pausa, fine sessione, uscita dalla pagina e passaggio dell’app in secondo piano
@@ -140,3 +140,13 @@ passaggio ad altre app continuano a mettere in pausa l’esercizio. Non vengono
 richiesti nuovi permessi né modificati i tempi di spegnimento del dispositivo.
 L’HTML usa Screen Wake Lock nei browser compatibili; se non disponibile o negato,
 la pagina lo segnala. La copia HTML stabile 6.4.4 resta invariata.
+
+## Riepilogo di fine sessione (6.6.3)
+
+A fine allenamento vocale viene mostrato un riquadro distinto dallo storico:
+corrette/totale e percentuale, errori, salti, tempo medio valido, aiuti e
+ripetizioni, cinque confusioni più frequenti e tre caratteri con più difficoltà.
+Tutti i conteggi riguardano soltanto l’ID della sessione appena terminata.
+Il riepilogo è disponibile anche per sessioni terminate prima della fine e
+rimane visibile dopo la riapertura, fino al successivo riepilogo o alla
+cancellazione delle statistiche vocali. Lo storico complessivo è conservato.
