@@ -1,27 +1,27 @@
 # CWZ, applicazione Android e HTML autonomo
 
-La versione in sviluppo **6.7.0** usa `CWZ_v6_7_0.html` come sorgente HTML comune.
+La versione in sviluppo **6.7.1** usa `CWZ_v6_7_1.html` come sorgente HTML comune.
 Durante la compilazione Android, Gradle copia esattamente questo file negli asset
 della WebView. Il file HTML può essere pubblicato su Aruba tramite HTTPS.
 
 ## Versioni HTML
 
-- [HTML 6.7.0](CWZ_v6_7_0.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
-- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
+- [HTML 6.7.1](CWZ_v6_7_1.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
+- [HTML 6.7.0](CWZ_v6_7_0.html): versione precedente con timer e gruppi vocali.\n- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
 - [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
 
-Il progetto Android usa soltanto il file HTML 6.7.0. Le versioni 6.6.3 e
+Il progetto Android usa soltanto il file HTML 6.7.1. Le versioni 6.6.3 e
 6.4.4 restano separate. Lo script di build e i test del repository si
-riferiscono alla 6.7.0.
+riferiscono alla 6.7.1.
 
 ## Download e installazione
 
-- [HTML 6.7.0](CWZ_v6_7_0.html), per pubblicazione su Aruba.
-- [APK 6.7.0](downloads/CWZ-6.7.0-debug.apk), generata e pubblicata dalla
+- [HTML 6.7.1](CWZ_v6_7_1.html), per pubblicazione su Aruba.
+- [APK 6.7.1](downloads/CWZ-6.7.1-debug.apk), generata e pubblicata dalla
   [pipeline di build](.github/workflows/build-cwz-670.yml) soltanto dopo il superamento dei test.
 - [APK 6.6.3 precedente](downloads/CWZ-6.6.3-debug.apk).
 
-La 6.7.0 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
+La 6.7.1 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
 Per aggiornare direttamente un'installazione precedente serve però la **stessa chiave di firma**.
 La firma di debug della pipeline GitHub può essere diversa da quella della APK già installata:
 in tal caso Android rifiuta l'installazione come aggiornamento.
@@ -41,7 +41,7 @@ servono una chiave di release privata e una procedura di firma coerente tra vers
 - Nessun permesso Internet o accesso generale ai file richiesto.
 - Permesso microfono richiesto soltanto quando si attiva il riconoscimento vocale.
 
-## Allenamento vocale (6.7.0)
+## Allenamento vocale (6.7.1)\n\nLe **Impostazioni CW** sono condivise da tutti gli esercizi e non contengono\npiù un collegamento preferenziale verso i gruppi scritti. La pagina\n**Statistiche** raccoglie sia i risultati degli esercizi scritti, sia le\nstatistiche vocali complete e il riepilogo dell'ultima sessione vocale.\nI due storici rimangono separati per evitare duplicazioni e aggregazioni\nstatisticamente improprie.
 
 La pagina **Allenamento vocale** utilizza la selezione di caratteri,
 la velocità e il tono delle **Impostazioni CW**. L'estrazione dei
@@ -52,17 +52,14 @@ Sono disponibili tre tipi di trasmissione:
 - **Gruppi fissi** di 2–7 caratteri (cursore).
 - **Gruppi casuali** di 2–7 caratteri, selezionati per ogni gruppo.
 
-La sessione mantiene il numero totale di caratteri scelto dall'utente.
-Il gruppo finale può essere più corto per rispettare tale totale.
-Nel modo casuale la selezione evita, ove possibile, di lasciare un
-gruppo finale di una sola lettera.
+Il parametro **Numero di ripetizioni** determina quanti esercizi vengono trasmessi:\nnei caratteri singoli, una ripetizione corrisponde a una lettera; nei gruppi,\nuna ripetizione corrisponde a un intero gruppo di lunghezza fissa o casuale.\nNon vengono creati gruppi finali troncati; le statistiche continuano a\nessere calcolate sui singoli caratteri.
 
 Si trasmette **l'intero gruppo** in Morse prima di accendere il microfono.
 Tra i caratteri si applicano le pause previste dalle Impostazioni CW, comprese\nle eventuali estensioni Farnsworth per la velocità effettiva.
 La risposta è l'intera sequenza nell'alfabeto fonetico NATO, per
 esempio: «Kilo India Passa Romeo Alfa».
 
-**Vuoto** e **Passa** occupano esattamente una posizione vuota.
+**Passa**, **Passo** e **Vuoto** occupano esattamente una posizione vuota.
 **Salta** completa il gruppo corrente con posizioni vuote.
 **Ripeti** ritrasmette il gruppo dall'inizio; **Pausa** sospende l'esercizio.
 La casella **Conferma automaticamente** è preselezionata. Disattivandola
@@ -119,7 +116,7 @@ Aprire questa cartella con Android Studio, oppure impostare `JAVA_HOME` e
 ./gradlew assembleDebug lintDebug
 ```
 
-APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.0-debug.apk` e come artifact.
+APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.1-debug.apk` e come artifact.
 Android Studio e Gradle generano automaticamente la chiave di debug locale.
 Installazione via USB con debug USB abilitato: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
@@ -162,7 +159,7 @@ errori; risposte da tastiera, correzioni vocali, aiuti, ripetizioni, interruzion
 e tentativi con problemi di riconoscimento sono esclusi. I pesi si aggiornano
 a ogni nuovo carattere e sono visibili nella tabella. Lo storico resta intatto.
 
-## Schermo durante l’allenamento vocale (6.6.3–6.7.0)
+## Schermo durante l’allenamento vocale (6.6.3–6.7.1)
 
 L’APK mantiene lo schermo acceso durante la sessione vocale e la prova microfono.
 Pausa, fine sessione, uscita dalla pagina e passaggio dell’app in secondo piano
