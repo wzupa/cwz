@@ -119,7 +119,8 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
     assert((await page.locator('#voiceSessionState').textContent()).includes('Terminata prima della fine'));
     assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
-    const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
+    await page.locator('#voiceSummary').locator('xpath=ancestor::details[1]/summary').click();
+     const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
     assert.equal((await d).suggestedFilename(), 'cwz-vocale.json');
     await page.reload(); assert.equal((await history(page)).length, 3);
     assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
@@ -176,7 +177,8 @@ test('compact statistics: arithmetic mean, valid sample counts, confusion matrix
     assert.deepEqual(await rows.nth(0).locator('td').allTextContents(), ['4', '1', '·']);
     assert.deepEqual(await rows.nth(1).locator('td').allTextContents(), ['·', '·', '1']);
     assert.equal(await page.locator('#voiceRecent').isVisible(), false);
-    await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
+    await page.locator('#voiceSummary').locator('xpath=ancestor::details[1]/summary').click();
+     await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
     assert.equal(await page.locator('#voiceRecent').isVisible(), true);
     assert(!/\d+\.\d+ s/.test(await page.locator('#voiceRecent').textContent()));
     assert.deepEqual(page.errors, []);
@@ -347,7 +349,8 @@ test('6.7.1 settings are shared, no exercise shortcut, voice statistics are in g
   await page.locator('#saveDefaults').waitFor({state:'visible'});
   await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
   await page.locator('#statsSummary').waitFor({state:'visible'});
-  await page.locator('#voiceSummary').waitFor({state:'visible'});
+  await page.locator('#voiceSummary').locator('xpath=ancestor::details[1]/summary').click();
+   await page.locator('#voiceSummary').waitFor({state:'visible'});
   assert.equal(await page.locator('#voiceLetters').count(),1); // Empty aggregate has no rendered dimensions.
   await page.getByRole('link',{name:'Allenamento vocale',exact:true}).first().click();
   await page.locator('#voiceStart').waitFor({state:'visible'});
