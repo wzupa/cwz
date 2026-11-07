@@ -107,7 +107,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert.equal(rows[1].recognitionRetries, 1); assert.equal(rows[1].responseMs, null);
     await listening(page); assert.equal(await page.locator('#voiceCode').isVisible(), false);
     await page.getByRole('link', { name: 'Impostazioni CW', exact: true }).first().click();
-    assert.equal(await page.evaluate(() => window.screenAwake), false);
+    await page.waitForFunction(() => window.screenAwake === false);
     assert(await page.evaluate(() => window.cancelCount) > 0);
     await page.locator('#chars').getByRole('button', { name: 'K', exact: true }).click();
     await page.locator('#chars').getByRole('button', { name: 'R', exact: true }).click();
@@ -223,7 +223,7 @@ test('browser adapter: top hypothesis, service failure, manual fallback, no back
     await page.locator('#voiceAnswer').fill('?'); await page.locator('#voiceConfirm').click();
     assert.equal((await history(page))[1].source, 'typed');
     await listening(page); await page.getByRole('link', { name: 'Home', exact: true }).click();
-    assert.equal(await page.evaluate(() => window.fakeRecognition.aborted), true);
+    await page.waitForFunction(() => window.fakeRecognition?.aborted === true);
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
 });
@@ -260,8 +260,8 @@ test('unsupported browser: manual session completes and preserves existing keybo
 test('6.7 voice defaults and full NATO group: provisional cells, omissions and colour coding', { timeout: 40000 }, async () => {
   const { page, context } = await openPage('native', ['K']);
   try {
-    await page.locator('#voiceAutoConfirm').check();
-    assert.equal(await page.locator('#voiceAutoConfirm').isChecked(), true);
+    await page.reload();
+    assert.equal(await page.locator('#voiceAutoConfirm').isChecked(), true, 'automatic approval is enabled by default');
     await page.locator('#voiceGroupMode').selectOption('fixed');
     await page.locator('#voiceGroupLength').evaluate(input => { input.value = '5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.locator('#voiceStart').click();
