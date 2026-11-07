@@ -85,14 +85,17 @@ final class VoiceRecognition {
                 @Override public void onEndOfSpeech() { emit(id, "processing", null, null); }
                 @Override public void onRmsChanged(float rms) {}
                 @Override public void onBufferReceived(byte[] buffer) {}
-                @Override public void onPartialResults(Bundle results) {}
+                @Override public void onPartialResults(Bundle results) {
+                    ArrayList<String> texts = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (texts != null && !texts.isEmpty()) emit(id, "partial", null, texts);
+                }
                 @Override public void onEvent(int type, Bundle params) {}
             });
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
             intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
             // Local mode uses the dedicated on-device API; never silently falls back to a network service.
             recognizer.startListening(intent);
             handler.postDelayed(() -> { if (active == id) fail(id, "Ascolto terminato. Tocca Rispondi a voce per riprovare."); }, 20000);
