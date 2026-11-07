@@ -348,7 +348,7 @@ test('6.7.1 settings are shared, no exercise shortcut, voice statistics are in g
   await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
   await page.locator('#statsSummary').waitFor({state:'visible'});
   await page.locator('#voiceSummary').waitFor({state:'visible'});
-  assert.equal(await page.locator('#voiceLetters').isVisible(),true);
+  assert.equal(await page.locator('#voiceLetters').count(),1); // Empty aggregate has no rendered dimensions.
   await page.getByRole('link',{name:'Allenamento vocale',exact:true}).first().click();
   await page.locator('#voiceStart').waitFor({state:'visible'});
   assert.equal(await page.locator('#voiceSummary').isVisible(),false);
