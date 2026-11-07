@@ -383,10 +383,10 @@ window.CWZAdaptive=Object.freeze({
   const round=v.current;
   try{
    await audioReady();if(v.current!==round||v.phase!=='playing')return;
-   const settings=v.session.settings,dot=1.2/settings.c,ctx=v.ctx,begin=ctx.currentTime+0.15;
+   const settings=v.session.settings,dot=1.2/settings.c,letterGap=timing(settings).charGap,ctx=v.ctx,begin=ctx.currentTime+0.15;
    let at=begin;
    for(let ci=0;ci<round.expected.length;ci++){
-   if(ci)at+=2*dot;
+   if(ci)at+=letterGap-dot;
    for(const symbol of morse[round.expected[ci]]){
     const duration=symbol==='.'?dot:3*dot,osc=ctx.createOscillator(),gain=ctx.createGain();
     osc.frequency.value=round.hz;osc.connect(gain);gain.connect(ctx.destination);
@@ -430,7 +430,8 @@ window.CWZAdaptive=Object.freeze({
    v.phase='awaiting';v.current.unknown++;
    v.current.draft=[];renderCells();
    status(message+' Puoi riprovare o rispondere da tastiera.');
-   armDeadline();
+   // A speech service failure must not be scored as a Morse omission.
+   // The user can restart listening explicitly when recognition fails.
   }
   refresh();
  }
