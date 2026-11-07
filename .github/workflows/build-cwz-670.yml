@@ -1,0 +1,64 @@
+name: Build and test CWZ 6.7.0
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'CWZ_v6_7_0.html'
+      - 'app/**'
+      - 'tests/**'
+      - 'package*.json'
+      - '.github/workflows/build-cwz-670.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install web test dependencies
+        run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx playwright-core install --with-deps chromium
+      - name: Run HTML voice and adaptive tests
+        run: |
+          CHROMIUM_PATH="$(find "$HOME/.cache/ms-playwright" -type f -name chrome -path '*/chrome-linux*/chrome' | head -1)"
+          if [ -z "$CHROMIUM_PATH" ]; then echo "Chromium executable missing" >&2; exit 1; fi
+          export CHROMIUM_PATH
+          npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK 35
+        run: sdkmanager --install 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Compile and lint Android beta
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug lintDebug
+      - name: Name and checksum beta APK
+        run: |
+          mkdir -p downloads
+          cp app/build/outputs/apk/debug/app-debug.apk downloads/CWZ-6.7.0-beta-debug.apk
+          sha256sum downloads/CWZ-6.7.0-beta-debug.apk > downloads/CWZ-6.7.0-beta-debug.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CWZ-6.7.0-beta-APK
+          path: |
+            downloads/CWZ-6.7.0-beta-debug.apk
+            downloads/CWZ-6.7.0-beta-debug.apk.sha256
+          retention-days: 30
+      - name: Publish the APK in the repository
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads/CWZ-6.7.0-beta-debug.apk downloads/CWZ-6.7.0-beta-debug.apk.sha256
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m 'Publish tested CWZ 6.7.0 Android beta APK'
+          git push origin HEAD:main || echo 'APK available as GitHub Actions artifact; repository push was denied'
