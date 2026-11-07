@@ -125,6 +125,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     await page.reload(); assert.equal((await history(page)).length, 3);
     assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
     assert.equal(await page.locator('#voiceAdaptive').inputValue(), '100');
+    await page.locator('#voiceSummary').locator('xpath=ancestor::details[1]/summary').click();
     assert((await page.locator('#voiceSummary').innerText()).includes('Risposte: 3'));
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
@@ -199,12 +200,15 @@ test('last session ranks its own confusions and does not include older errors', 
       localStorage.setItem('cwz-voice-last-session-v1', JSON.stringify({ id: 'last', planned: 4, completed: true }));
     });
     await page.reload();
-    await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
+    await page.getByRole('link', {name:'Allenamento vocale',exact:true}).first().click();
     assert((await page.locator('#voiceSessionScore').textContent()).includes('1/4 corrette (25%)'));
     assert.equal(await page.locator('#voiceSessionErrors').textContent(), 'Confusioni più frequenti: R → K ×2 · T → E ×1');
     assert((await page.locator('#voiceSessionWeak').textContent()).includes('R (2/3)'));
+    await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
+    await page.locator('#voiceSummary').locator('xpath=ancestor::details[1]/summary').click();
     page.once('dialog', dialog => dialog.accept());
     await page.locator('#voiceClear').click();
+    await page.getByRole('link', {name:'Allenamento vocale',exact:true}).first().click();
     assert.equal(await page.locator('#voiceSessionSummary').isVisible(), false);
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
