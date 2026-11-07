@@ -17,20 +17,20 @@ riferiscono alla 6.7.0.
 ## Download e installazione
 
 - [HTML 6.7.0](CWZ_v6_7_0.html), per pubblicazione su Aruba.
-- [APK 6.7.0 Beta](downloads/CWZ-6.7.0-beta-debug.apk), generata dalla
-  [pipeline di build](.github/workflows/build-cwz-670.yml) **solo dopo il superamento dei test**.
+- [APK 6.7.0](downloads/CWZ-6.7.0-debug.apk), generata e pubblicata dalla
+  [pipeline di build](.github/workflows/build-cwz-670.yml) soltanto dopo il superamento dei test.
 - [APK 6.6.3 precedente](downloads/CWZ-6.6.3-debug.apk).
 
-La **6.7.0 Beta** viene compilata con identificativo `it.wzupa.cwz.beta`,
-separato dalla versione precedente `it.wzupa.cwz`: le due applicazioni
-coesistono senza sovrascriversi. Questa scelta evita di richiedere la
-disinstallazione della versione precedente, che comporterebbe la perdita
-delle statistiche locali, poiché le firme di sviluppo non sono garantite
-identiche. Le statistiche non vengono migrate tra le due app.
+La 6.7.0 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
+Per aggiornare direttamente un'installazione precedente serve però la **stessa chiave di firma**.
+La firma di debug della pipeline GitHub può essere diversa da quella della APK già installata:
+in tal caso Android rifiuta l'installazione come aggiornamento.
+Prima di disinstallare una versione precedente, esportare le statistiche in JSON:
+la disinstallazione può cancellare i dati locali. Un backup non è attualmente importabile
+dalla pagina.
 
-L'APK di prova è firmata con la chiave di debug del sistema di compilazione.
-Per una distribuzione definitiva è necessaria una chiave di release
-controllata dal proprietario. Non pubblicare la chiave o password nel repository.
+L'APK di debug è destinata ai test sul telefono; per una distribuzione stabile
+servono una chiave di release privata e una procedura di firma coerente tra versioni.
 
 ## Funzioni Android
 
@@ -119,7 +119,7 @@ Aprire questa cartella con Android Studio, oppure impostare `JAVA_HOME` e
 ./gradlew assembleDebug lintDebug
 ```
 
-APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz.beta`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.0-beta-debug.apk` e come artifact.
+APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.0-debug.apk` e come artifact.
 Android Studio e Gradle generano automaticamente la chiave di debug locale.
 Installazione via USB con debug USB abilitato: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
