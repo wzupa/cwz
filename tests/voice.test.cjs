@@ -481,3 +481,28 @@ test('6.7.4 voice results stay on exercise page and sections are collapsible', {
   assert.deepEqual(page.errors,[]);
  }finally{await context.close()}
 });
+
+test('6.7.5 Home displays all navigation destinations with matching colours and contact', {timeout:30000}, async()=>{
+ const {page,context}=await openPage('manual',['K']);
+ try{
+  await page.goto(url+'/#home');
+  const targets=['groups','voice','settings','stats','conventions'];
+  for(const target of targets){
+   assert.equal(await page.locator('#page-home .home-links a[href="#'+target+'"]').count(),1);
+   assert.equal(await page.locator('.site-nav a[data-route="'+target+'"]').count(),1);
+   const colours=await page.evaluate(t=>{
+    const tile=document.querySelector('#page-home .home-links a[href="#'+t+'"]');
+    const nav=document.querySelector('.site-nav a[data-route="'+t+'"]');
+    return [getComputedStyle(tile).backgroundColor,getComputedStyle(nav).backgroundColor];
+   },target);
+   assert.deepEqual(colours.slice(0,1),colours.slice(1));
+  }
+  assert.equal(await page.locator('#page-home .home-links a').count(),5);
+  await page.locator('#page-home .home-links a[href="#voice"]').click();
+  await page.locator('#voiceStart').waitFor({state:'visible'});
+  await page.locator('.site-nav a[data-route="home"]').click();
+  await page.locator('#page-home .home-footer a').click();
+  assert.equal(await page.locator('#page-credits a[href="mailto:walter@iu7vnr.it"]').count(),1);
+  assert.deepEqual(page.errors,[]);
+ } finally{await context.close()}
+});
