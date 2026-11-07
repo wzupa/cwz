@@ -66,4 +66,13 @@ jobs:
           git add downloads/CWZ-6.7.3-debug.apk downloads/CWZ-6.7.3-debug.apk.sha256
           if git diff --staged --quiet; then exit 0; fi
           git commit -m 'Publish tested CWZ 6.7.3 Android APK'
-          git push origin HEAD:main || echo 'APK available as GitHub Actions artifact; repository push was denied'
+          # Another workflow or documentation update may have advanced main during compilation.
+          # Rebase the binary commit and retry rather than silently leaving the APK unpublished.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          echo 'Unable to publish the APK after five retries' >&2
+          exit 1
