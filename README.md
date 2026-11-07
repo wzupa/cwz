@@ -1,29 +1,36 @@
-# CWZ per Android
+# CWZ, applicazione Android e HTML autonomo
 
-App Android offline basata su `CWZ_v6_6_3.html`, mantenuto come sorgente unico
-e copiato negli asset durante la compilazione. Il file HTML e il progetto Android vengono aggiornati insieme.
+La versione in sviluppo **6.7.0** usa `CWZ_v6_7_0.html` come sorgente HTML comune.
+Durante la compilazione Android, Gradle copia esattamente questo file negli asset
+della WebView. Il file HTML può essere pubblicato su Aruba tramite HTTPS.
 
 ## Versioni HTML
 
-- [HTML attuale 6.6.3](CWZ_v6_6_3.html): include allenamento vocale e livello adattivo.
+- [HTML 6.7.0](CWZ_v6_7_0.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
+- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
 - [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
 
-Il progetto Android usa soltanto il file della versione attuale. La copia stabile
-resta separata e non viene aggiornata automaticamente con le nuove funzioni.
+Il progetto Android usa soltanto il file HTML 6.7.0. Le versioni 6.6.3 e
+6.4.4 restano separate. Lo script di build e i test del repository si
+riferiscono alla 6.7.0.
 
-## Installazione sul telefono
+## Download e installazione
 
-1. Scaricare [CWZ-6.6.3-debug.apk](downloads/CWZ-6.6.3-debug.apk) sul telefono e aprirlo.
-2. Se richiesto, consentire a quell'app (browser o gestore file) di installare
-   applicazioni da questa origine, quindi scegliere **Installa**.
-3. Aprire **CWZ**. Richiede Android 8.0 o successivo e Android System WebView aggiornato.
+- [HTML 6.7.0](CWZ_v6_7_0.html), per pubblicazione su Aruba.
+- [APK 6.7.0 Beta](downloads/CWZ-6.7.0-beta-debug.apk), generata dalla
+  [pipeline di build](.github/workflows/build-cwz-670.yml) **solo dopo il superamento dei test**.
+- [APK 6.6.3 precedente](downloads/CWZ-6.6.3-debug.apk).
 
-CWZ è un’applicazione autonoma per l’allenamento Morse. La versione 6.6.3 aggiunge il riepilogo dell’ultima sessione e mantiene lo schermo acceso durante l’allenamento vocale, conservando il cursore configurabile fra selezione casuale e adattiva, mantenendo tempi medi e matrice di confusione e conserva le correzioni per tastiera e barre di sistema. Include la sezione Crediti con Walter IU7VNR e la versione dell’app. Usa il logo CWZ originale incluso nell'HTML come icona Android.
-Si installa come aggiornamento della 6.4, senza disinstallare l'app.
+La **6.7.0 Beta** viene compilata con identificativo `it.wzupa.cwz.beta`,
+separato dalla versione precedente `it.wzupa.cwz`: le due applicazioni
+coesistono senza sovrascriversi. Questa scelta evita di richiedere la
+disinstallazione della versione precedente, che comporterebbe la perdita
+delle statistiche locali, poiché le firme di sviluppo non sono garantite
+identiche. Le statistiche non vengono migrate tra le due app.
 
-Questa APK usa una firma di sviluppo: è adatta alle prove sul telefono.
-Per distribuzione pubblica e aggiornamenti stabili occorre una chiave di release
-conservata dal proprietario; non inserire mai chiavi o password nel repository.
+L'APK di prova è firmata con la chiave di debug del sistema di compilazione.
+Per una distribuzione definitiva è necessaria una chiave di release
+controllata dal proprietario. Non pubblicare la chiave o password nel repository.
 
 ## Funzioni Android
 
@@ -34,23 +41,47 @@ conservata dal proprietario; non inserire mai chiavi o password nel repository.
 - Nessun permesso Internet o accesso generale ai file richiesto.
 - Permesso microfono richiesto soltanto quando si attiva il riconoscimento vocale.
 
-## Allenamento vocale
+## Allenamento vocale (6.7.0)
 
-La pagina **Allenamento vocale** usa sempre i caratteri, la velocità e il tono
-delle **Impostazioni CW**, anche dopo una modifica e una ripresa della sessione.
-Ogni turno riproduce un singolo carattere, poi ascolta una parola NATO o il nome
-di una cifra/simbolo. Il codice in punti e linee resta nascosto finché si preme
-**Mostra codice Morse**, e torna nascosto al turno successivo.
+La pagina **Allenamento vocale** utilizza la selezione di caratteri,
+la velocità e il tono delle **Impostazioni CW**. L'estrazione dei
+caratteri può essere casuale o adattiva (cursore 0–100%, predefinito 40%).
 
-1. Scegliere il riconoscitore e la lingua; provare prima **Prova microfono**.
-2. Premere **Inizia sessione** e autorizzare il microfono, se richiesto.
-3. Dopo il suono attendere **Microfono attivo**, poi pronunciare una parola NATO.
-4. Controllare il testo riconosciuto, correggerlo se necessario e confermare.
-   La conferma automatica è facoltativa e inizialmente disattivata.
+Sono disponibili tre tipi di trasmissione:
+- **Carattere singolo**, come nella 6.6.3.
+- **Gruppi fissi** di 2–7 caratteri (cursore).
+- **Gruppi casuali** di 2–7 caratteri, selezionati per ogni gruppo.
 
-Durante l'ascolto i comandi **Ripeti**, **Salta**, **Pausa** sono riconosciuti
-separatamente dalle risposte. In pausa il microfono è spento: premere **Continua**
-per riprendere. Sono sempre disponibili ripetizione e risposte da tastiera.
+La sessione mantiene il numero totale di caratteri scelto dall'utente.
+Il gruppo finale può essere più corto per rispettare tale totale.
+Nel modo casuale la selezione evita, ove possibile, di lasciare un
+gruppo finale di una sola lettera.
+
+Si trasmette **l'intero gruppo** in Morse prima di accendere il microfono.
+Tra i caratteri si usano le pause standard di 3 unità Morse.
+La risposta è l'intera sequenza nell'alfabeto fonetico NATO, per
+esempio: «Kilo India Passa Romeo Alfa».
+
+**Vuoto** e **Passa** occupano esattamente una posizione vuota.
+**Salta** completa il gruppo corrente con posizioni vuote.
+**Ripeti** ritrasmette il gruppo dall'inizio; **Pausa** sospende l'esercizio.
+La casella **Conferma automaticamente** è preselezionata. Disattivandola
+si può correggere la trascrizione e confermare manualmente.
+
+Le celle sono neutre prima del riconoscimento, mostrano contenuto
+provvisorio senza valutarlo quando arriva un risultato intermedio
+e diventano **verdi** per le lettere corrette o **rosse** per gli errori
+e le omissioni quando la risposta viene confermata.
+
+Il **timer di risposta** è facoltativo, regolabile e completamente
+invisibile, senza conto alla rovescia. Parte quando il microfono è pronto
+(al termine del suono), misura il tempo prima dell'inizio della voce e
+non penalizza il tempo impiegato dal riconoscitore a elaborare la frase.
+Se scade prima che inizi una risposta, le posizioni rimanenti sono omissioni.
+In caso di risultato parziale e frase interrotta, CWZ accetta più segmenti
+vocali per completare il gruppo e riavvia il timer per la continuazione.
+Anche senza timer, il motore vocale può terminare un ascolto non produttivo,
+consentendo di riprovare o rispondere da tastiera.
 
 Nell'APK viene usato `SpeechRecognizer` Android. Dove supportato è disponibile
 il riconoscitore locale dedicato (Android 12+); la presenza dei modelli della
@@ -65,7 +96,7 @@ servono un contesto consentito dal browser, normalmente HTTPS, e il permesso
 microfono. Se il riconoscimento non è disponibile, la pagina resta utilizzabile
 da tastiera. Qualità, lingue e funzionamento offline dipendono dal dispositivo.
 
-Le statistiche vocali sono separate dagli esercizi a gruppi: correttezza,
+Le statistiche vocali sono separate dagli esercizi a gruppi scritti: correttezza,
 confusioni, ripetizioni, aiuti, correzioni della trascrizione e tempi medi,
 anche per carattere. Il tempo è indicativo, dalla fine del primo suono al
 rilevamento dell'inizio del parlato; esclude la trascrizione finale. Sono escluse
@@ -80,7 +111,7 @@ una funzione di importazione del backup.
 
 ## Compilazione
 
-Servono JDK 17 o 21, Android SDK Platform 35 e Build Tools 35.0.0.
+Servono JDK 17 o 21, Android SDK Platform 35 e Build Tools 35.0.0. In CI il test browser viene eseguito prima della compilazione Android.
 Aprire questa cartella con Android Studio, oppure impostare `JAVA_HOME` e
 `ANDROID_HOME` e usare Gradle 8.9 (wrapper incluso):
 
@@ -88,7 +119,7 @@ Aprire questa cartella con Android Studio, oppure impostare `JAVA_HOME` e
 ./gradlew assembleDebug lintDebug
 ```
 
-APK generata: `app/build/outputs/apk/debug/app-debug.apk`.
+APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz.beta`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.0-beta-debug.apk` e come artifact.
 Android Studio e Gradle generano automaticamente la chiave di debug locale.
 Installazione via USB con debug USB abilitato: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
@@ -131,7 +162,7 @@ errori; risposte da tastiera, correzioni vocali, aiuti, ripetizioni, interruzion
 e tentativi con problemi di riconoscimento sono esclusi. I pesi si aggiornano
 a ogni nuovo carattere e sono visibili nella tabella. Lo storico resta intatto.
 
-## Schermo durante l’allenamento vocale (6.6.3)
+## Schermo durante l’allenamento vocale (6.6.3–6.7.0)
 
 L’APK mantiene lo schermo acceso durante la sessione vocale e la prova microfono.
 Pausa, fine sessione, uscita dalla pagina e passaggio dell’app in secondo piano
