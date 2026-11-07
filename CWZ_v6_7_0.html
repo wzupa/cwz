@@ -384,7 +384,7 @@ window.CWZAdaptive=Object.freeze({
  function errorMessage(message){
   v.listening=false;clearTimeout(v.listenTimeout);
   if(v.test){v.test=false;v.phase='idle';status(message)}
-  else if(active()){v.phase='awaiting';if(v.current)v.current.unknown++;status(message+' Puoi riprovare o rispondere da tastiera.');}
+  else if(active()){v.phase='awaiting';if(v.current)v.current.unknown++;status(message+' Puoi riprovare o rispondere da tastiera.');armDeadline();}
   refresh();
  }
  function receive(texts){
@@ -402,13 +402,13 @@ window.CWZAdaptive=Object.freeze({
     for(const answer of decoded){if(v.current.answers.length<v.current.expected.length)v.current.answers.push(answer)}
     renderCells();el('voiceAnswer').value=v.current.answers.map(x=>x||'∅').join(' ');
     if(v.current.answers.length>=v.current.expected.length){finishGroup('voice');return}
-    if(el('voiceAutoConfirm').checked){listen();return}
-    v.phase='candidate';refresh();return;
+    if(el('voiceAutoConfirm').checked){listen();armDeadline();return}
+    v.phase='candidate';refresh();armDeadline();return;
    }
   }
   if(command==='pause'){pauseVoice();return}
   if(command==='repeat'){playCurrent(true);return}
-  if(command==='skip'){if(v.current.expected.length===1)record('', 'skipped');else{v.current.answers.push('');renderCells();if(v.current.answers.length>=v.current.expected.length)finishGroup('skipped');else listen()}return}
+  if(command==='skip'){if(v.current.expected.length===1)record('', 'skipped');else{v.current.answers.push('');renderCells();if(v.current.answers.length>=v.current.expected.length)finishGroup('skipped');else{listen();armDeadline()}}return}
   const answer=decode(text);
   if(!answer){errorMessage('Parola non riconosciuta nell’alfabeto NATO. Nessun errore Morse conteggiato.');return}
   v.heard={answer,text,speechAt:v.speechAt};v.phase='candidate';el('voiceAnswer').value=answer;
@@ -454,7 +454,7 @@ window.CWZAdaptive=Object.freeze({
   status('Gruppo completato: '+round.expected.length+' caratteri.');v.timer=setTimeout(nextRound,1000);
  }
  function record(answer,source){
-  if(v.current&&v.current.expected.length>1){v.current.answers.push(answer);renderCells();if(v.current.answers.length>=v.current.expected.length)finishGroup(source);else if(canSpeak())listen();return}
+  if(v.current&&v.current.expected.length>1){v.current.answers.push(answer);renderCells();if(v.current.answers.length>=v.current.expected.length)finishGroup(source);else if(canSpeak()){listen();armDeadline()}return}
 
   if(!active()||!['awaiting','candidate'].includes(v.phase))return;
   const round=v.current,heard=v.heard;
