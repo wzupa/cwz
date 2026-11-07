@@ -456,3 +456,21 @@ test('6.7.4 numbers and direct punctuation in manual recognition', {timeout:3000
   assert.deepEqual(page.errors,[]);
  }finally{await context.close()}
 });
+
+test('6.7.4 voice results stay on exercise page and sections are collapsible', {timeout:30000}, async () => {
+ const {page,context}=await openPage('native',['K']);
+ try{
+  assert.equal(await page.locator('#voiceSessionSummary').evaluate(node=>node.closest('.route-page').id),'page-voice');
+  assert.equal(await page.locator('#page-stats #voiceSessionSummary').count(),0);
+  const guide=page.locator('#page-voice section.cwz-fold').last().locator(':scope > details');
+  assert.equal(await guide.evaluate(el=>el.open),false);
+  await guide.locator(':scope > summary').click();
+  assert.equal(await guide.evaluate(el=>el.open),true);
+  await page.locator('#voiceStart').click();
+  await page.locator('#voiceEnd').click();
+  await page.waitForFunction(()=>!document.getElementById('voiceSessionSummary').hidden);
+  assert.equal(await page.locator('#voiceSessionSummary details').evaluate(el=>el.open),true);
+  assert.match(await page.locator('#voiceSessionState').innerText(),/Terminata|Completata/);
+  assert.deepEqual(page.errors,[]);
+ }finally{await context.close()}
+});
