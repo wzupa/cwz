@@ -26,7 +26,7 @@
     <div><label for="voiceCount">Caratteri per sessione</label><select id="voiceCount"><option value="10">10</option><option value="20">20</option><option value="50">50</option></select></div>
   </div>
   <p class="hint">Caratteri, velocità e tono seguono sempre le <a href="#settings">Impostazioni CW</a>. Microfono attivo soltanto dopo il suono. Il servizio di sistema e il browser possono inviare l’audio al loro fornitore; la modalità locale Android non usa il servizio remoto. CWZ non salva registrazioni audio.</p>
-  <div class="grid"><div><label for="voiceGroupMode">Trasmissione</label><select id="voiceGroupMode"><option value="single">Caratteri singoli</option><option value="fixed">Gruppi a lunghezza fissa</option><option value="random">Gruppi casuali (2–7)</option></select></div><div id="voiceGroupLengthWrap" hidden><label for="voiceGroupLength">Caratteri per gruppo: <output id="voiceGroupLengthValue">5</output></label><input id="voiceGroupLength" type="range" min="2" max="7" value="5"></div><div><label for="voiceDeadline">Tempo massimo di risposta</label><select id="voiceDeadline"><option value="0">Disattivato</option><option value="3">3 secondi</option><option value="5">5 secondi</option><option value="8">8 secondi</option><option value="10">10 secondi</option><option value="15">15 secondi</option><option value="20">20 secondi</option><option value="30">30 secondi</option></select></div></div>
+  <div class="grid"><div><label for="voiceGroupMode">Trasmissione</label><select id="voiceGroupMode"><option value="single">Caratteri singoli</option><option value="fixed">Gruppi a lunghezza fissa</option><option value="random">Gruppi casuali (2–7)</option></select></div><div id="voiceGroupLengthWrap" hidden><label for="voiceGroupLength">Caratteri per gruppo: <output id="voiceGroupLengthValue">5</output></label><input id="voiceGroupLength" type="range" min="2" max="7" value="5"></div><div><label for="voiceDeadline">Tempo massimo di risposta</label><select id="voiceDeadline"><option value="0">Disattivato</option><option value="1">1 secondo</option><option value="2">2 secondi</option><option value="3">3 secondi</option><option value="5">5 secondi</option><option value="8">8 secondi</option><option value="10">10 secondi</option><option value="15">15 secondi</option><option value="20">20 secondi</option><option value="30">30 secondi</option></select></div></div>
   <label class="check"><input id="voiceAutoConfirm" type="checkbox" checked> Conferma automaticamente le parole riconosciute</label>
   <p class="hint">Il limite di risposta, se attivo, misura l’attesa prima che inizi a parlare, senza interrompere una frase già iniziata o penalizzare l’elaborazione vocale. Nessun conto alla rovescia viene mostrato. La conferma automatica è attiva per impostazione predefinita.</p>
   <div class="buttonrow"><button class="secondary" id="voiceTest">Prova microfono</button><button class="primary" id="voiceStart">Inizia sessione</button></div>
@@ -44,7 +44,7 @@
     <input id="voiceAnswer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Kilo India Passa Romeo Alfa" disabled>
     <div class="buttonrow"><button class="primary" id="voiceConfirm" type="submit" disabled>Conferma risposta</button><button class="secondary" id="voiceRetry" type="button" disabled>Riprova voce</button></div>
   </form>
-  <p class="hint">Comandi vocali: “Vuoto” e “Passa” lasciano vuota una posizione, “Salta” conclude il gruppo con omissioni, “Ripeti” e “Pausa” gestiscono l’esercizio. “Continua” o “Avanti” riproducono di nuovo il carattere. Quando sei in pausa, riattiva l’esercizio con il pulsante Continua.</p>
+  <p class="hint">Comandi vocali: “Vuoto” e “Passa” lasciano vuota una posizione, “Salta” conclude il gruppo con omissioni, “Ripeti” e “Pausa” gestiscono l’esercizio. In pausa usa il pulsante Continua.</p>
 </section>
 <section id="voiceSessionSummary" hidden aria-label="Riepilogo ultima sessione vocale"><h2>Ultima sessione</h2><p id="voiceSessionState" class="hint"></p><p id="voiceSessionScore" class="stat" aria-live="polite"></p><p id="voiceSessionTime" class="hint"></p><p id="voiceSessionErrors"></p><p id="voiceSessionWeak" class="hint"></p></section>
 <section>
@@ -407,7 +407,9 @@ window.CWZAdaptive=Object.freeze({
  function nextRound(){
   if(!v.session)return;if(v.session.done>=v.session.count){endSession(true);return}
   const pool=v.session.pool,weights=CWZAdaptive.weights(v.history,pool,v.session.settings);
-  const mode=el('voiceGroupMode').value,len=mode==='single'?1:mode==='random'?2+Math.floor(Math.random()*6):+el('voiceGroupLength').value;
+  const mode=el('voiceGroupMode').value,remaining=v.session.count-v.session.done;
+  const choices=Array.from({length:Math.min(7,remaining)-1},(_,i)=>i+2).filter(n=>remaining-n!==1);
+  const len=mode==='single'?1:mode==='random'?(choices[Math.floor(Math.random()*choices.length)]||remaining):+el('voiceGroupLength').value;
   const expected=Array.from({length:Math.min(len,v.session.count-v.session.done)},()=>CWZAdaptive.draw(pool,weights,+el('voiceAdaptive').value/100)).join('');
   v.current={expected,answers:[],draft:[],transcripts:[],firstSpeechAt:null,hz:v.session.settings.randomTone?500+Math.floor(Math.random()*401):v.session.settings.hz,repeats:0,help:false,interrupted:false,firstSoundEndedAt:null,soundEndedAt:null,unknown:0};
   hideCode();if(el('voiceGuide').open)markHelp();playCurrent();
