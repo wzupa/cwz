@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_6_3.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_0.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -48,6 +48,9 @@ async function openPage(kind = 'native', pool = ['K']) {
     }
   }, { kind, pool });
   await page.goto(url + '/#voice');
+  // Historical single-character tests exercise the manual approval path.
+  // A separate test below verifies that auto-approval defaults to enabled.
+  await page.locator('#voiceAutoConfirm').uncheck();
   return { page, context };
 }
 async function listening(page) {
@@ -252,4 +255,84 @@ test('unsupported browser: manual session completes and preserves existing keybo
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('cwz-history-v1'))[0].id), 'existing');
     assert.deepEqual(page.errors, []);
   } finally { await context.close(); }
+});
+
+test('6.7 voice defaults and full NATO group: provisional cells, omissions and colour coding', { timeout: 40000 }, async () => {
+  const { page, context } = await openPage('native', ['K']);
+  try {
+    await page.locator('#voiceAutoConfirm').check();
+    assert.equal(await page.locator('#voiceAutoConfirm').isChecked(), true);
+    await page.locator('#voiceGroupMode').selectOption('fixed');
+    await page.locator('#voiceGroupLength').evaluate(input => { input.value = '5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.locator('#voiceStart').click();
+    await listening(page);
+    assert.equal(await page.locator('#voiceCells .voice-letter-cell').count(), 5);
+    await page.evaluate(() => {
+      const id = window.requests.at(-1).id;
+      window.CWZVoice.onNativeEvent({id, type:'speech', delayMs:100});
+      window.CWZVoice.onNativeEvent({id, type:'partial', alternatives:['Kilo India']});
+    });
+    assert.deepEqual(await page.locator('#voiceCells .voice-letter-cell').evaluateAll(cells => cells.map(el => el.dataset.state)), ['tentative','tentative','pending','pending','pending']);
+    await nativeResult(page, 'Kilo India Vuoto Kilo Passa');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===5);
+    assert.deepEqual((await history(page)).map(r => r.answer), ['K','I','','K','']);
+    assert.deepEqual(await page.locator('#voiceCells .voice-letter-cell').evaluateAll(cells => cells.map(el => el.dataset.state)), ['correct','wrong','wrong','correct','wrong']);
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
+test('6.7 late final result after speech onset does not timeout or land in a later group', { timeout: 40000 }, async () => {
+  const { page, context } = await openPage('native', ['K']);
+  try {
+    await page.locator('#voiceAutoConfirm').check();
+    await page.locator('#voiceGroupMode').selectOption('fixed');
+    await page.locator('#voiceGroupLength').evaluate(input => { input.value = '2'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.locator('#voiceDeadline').selectOption('1');
+    await page.locator('#voiceStart').click(); await listening(page);
+    const oldId = await page.evaluate(() => {
+      const id = window.requests.at(-1).id;
+      window.CWZVoice.onNativeEvent({id, type:'speech', delayMs:50});
+      return id;
+    });
+    await page.waitForTimeout(1300);
+    assert.equal((await history(page)).length, 0, 'speech onset suspends deadline even if final ASR is late');
+    await page.evaluate(id => window.CWZVoice.onNativeEvent({id, type:'result', alternatives:['Kilo Kilo']}), oldId);
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===2);
+    await listening(page);
+    await page.evaluate(id => window.CWZVoice.onNativeEvent({id, type:'result', alternatives:['Kilo Kilo']}), oldId);
+    assert.equal((await history(page)).length, 2, 'stale recognition result must not affect next group');
+    await page.locator('#voiceEnd').click();
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
+test('6.7 timer expires invisibly and records omissions for all unanswered cells', { timeout: 30000 }, async () => {
+  const { page, context } = await openPage('native', ['K']);
+  try {
+    await page.locator('#voiceGroupMode').selectOption('fixed');
+    await page.locator('#voiceGroupLength').evaluate(input => { input.value = '3'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.locator('#voiceDeadline').selectOption('1');
+    await page.locator('#voiceStart').click(); await listening(page);
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===3);
+    assert.deepEqual((await history(page)).map(r => r.answer), ['','','']);
+    assert.deepEqual(await page.locator('#voiceCells .voice-letter-cell').evaluateAll(cells => cells.map(el => el.dataset.state)), ['wrong','wrong','wrong']);
+    assert.equal(await page.locator('#voiceDeadlineRemaining').count(), 0);
+    assert.deepEqual(page.errors, []);
+  } finally { await context.close(); }
+});
+
+test('6.7 complete groups over two recognition segments and preserve NATO index positions', { timeout: 30000 }, async () => {
+  const {page,context}=await openPage('native',['K']);
+  try {
+    await page.locator('#voiceAutoConfirm').check();
+    await page.locator('#voiceGroupMode').selectOption('fixed');
+    await page.locator('#voiceGroupLength').evaluate(input => { input.value='4'; input.dispatchEvent(new Event('input',{bubbles:true})); });
+    await page.locator('#voiceStart').click(); await listening(page);
+    await nativeResult(page,'Kilo India'); await listening(page);
+    assert.equal((await history(page)).length,0);
+    await nativeResult(page,'Vuoto Kilo');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===4);
+    assert.deepEqual((await history(page)).map(r=>r.answer),['K','I','','K']);
+    assert.deepEqual(page.errors,[]);
+  } finally {await context.close()}
 });
