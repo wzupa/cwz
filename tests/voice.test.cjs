@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_0.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_1.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -117,6 +117,7 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     rows = await history(page); assert.equal(rows[2].expected, 'R'); assert.equal(rows[2].correct, true);
     await page.locator('#voiceEnd').click();
     assert.equal(await page.evaluate(() => window.screenAwake), false);
+    await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
     assert((await page.locator('#voiceSessionState').textContent()).includes('Terminata prima della fine'));
     assert((await page.locator('#voiceSessionScore').textContent()).includes('3/3 corrette (100%)'));
     const d = page.waitForEvent('download'); await page.locator('#voiceExport').click();
@@ -168,6 +169,7 @@ test('compact statistics: arithmetic mean, valid sample counts, confusion matrix
       ]));
     });
     await page.reload();
+    await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
     const cells = await page.locator('#voiceLetters tbody tr').first().locator('td').allTextContents();
     assert.deepEqual(cells, ['K', '4/5', '3.00 s', '3', '1.00×']);
     assert((await page.locator('#voiceSummary').textContent()).includes('Tempo medio: 3.00 s'));
@@ -196,6 +198,7 @@ test('last session ranks its own confusions and does not include older errors', 
       localStorage.setItem('cwz-voice-last-session-v1', JSON.stringify({ id: 'last', planned: 4, completed: true }));
     });
     await page.reload();
+    await page.getByRole('link', {name:'Statistiche',exact:true}).first().click();
     assert((await page.locator('#voiceSessionScore').textContent()).includes('1/4 corrette (25%)'));
     assert.equal(await page.locator('#voiceSessionErrors').textContent(), 'Confusioni più frequenti: R → K ×2 · T → E ×1');
     assert((await page.locator('#voiceSessionWeak').textContent()).includes('R (2/3)'));
@@ -335,4 +338,43 @@ test('6.7 complete groups over two recognition segments and preserve NATO index 
     assert.deepEqual((await history(page)).map(r=>r.answer),['K','I','','K']);
     assert.deepEqual(page.errors,[]);
   } finally {await context.close()}
+});
+
+test('6.7.1 settings are shared, no exercise shortcut, voice statistics are in general stats', async () => {
+ const {page,context}=await openPage('native',['K']);
+ try {
+  await page.getByRole('link',{name:'Impostazioni CW',exact:true}).first().click();
+  assert.equal(await page.getByText('Vai a Gruppi di codice').count(),0);
+  assert.equal(await page.locator('#saveDefaults').isVisible(),true);
+  await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
+  assert.equal(await page.locator('#statsSummary').isVisible(),true);
+  assert.equal(await page.locator('#voiceSummary').isVisible(),true);
+  assert.equal(await page.locator('#voiceLetters').isVisible(),true);
+  await page.getByRole('link',{name:'Allenamento vocale',exact:true}).first().click();
+  assert.equal(await page.locator('#voiceSummary').isVisible(),false);
+  assert.deepEqual(page.errors,[]);
+ }finally{await context.close()}
+});
+
+test('6.7.1 each repetition corresponds to one complete group and Passo / Passa skip a position', {timeout:30000},async()=>{
+ const {page,context}=await openPage('native',['K']);
+ try{
+  await page.locator('#voiceAutoConfirm').check();
+  await page.locator('#voiceGroupMode').selectOption('fixed');
+  await page.locator('#voiceGroupLength').evaluate(input=>{input.value='3';input.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#voiceCount').selectOption('10');
+  await page.locator('#voiceStart').click();await listening(page);
+  assert.equal(await page.locator('#voiceProgress').textContent().then(x=>x.includes('Ripetizione 1 di 10')),true);
+  assert.equal(await page.locator('#voiceCells .voice-letter-cell').count(),3);
+  await nativeResult(page,'Passo Kilo Passa');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===3);
+  assert.deepEqual((await history(page)).map(r=>r.answer),['','K','']);
+  await listening(page);
+  assert((await page.locator('#voiceProgress').textContent()).includes('Ripetizione 2 di 10'));
+  assert.equal(await page.locator('#voiceCells .voice-letter-cell').count(),3);
+  await page.locator('#voiceEnd').click();
+  await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
+  assert((await page.locator('#voiceSessionScore').textContent()).includes('1/3 corrette'));
+  assert.deepEqual(page.errors,[]);
+ } finally {await context.close()}
 });
