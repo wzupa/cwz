@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_3.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_4.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -416,7 +416,7 @@ test('6.7.2 isolated kg is accepted as the single NATO letter K', { timeout: 150
  } finally {await context.close()}
 });
 
-test('6.7.3 conventions page is reachable and lists letters, digits, symbols and commands',async()=>{
+test('6.7.4 conventions page is reachable and lists letters, digits, symbols and commands',async()=>{
  const {page,context}=await openPage('native',['K']);
  try {
   await page.getByRole('link',{name:'Convenzioni vocali',exact:true}).first().click();
@@ -426,7 +426,7 @@ test('6.7.3 conventions page is reachable and lists letters, digits, symbols and
   assert.deepEqual(page.errors,[]);
  }finally{await context.close()}
 });
-test('6.7.3 combined symbols and numbers use actual selected character pool and preserve symbol positions', {timeout:35000},async()=>{
+test('6.7.4 combined symbols and numbers use actual selected character pool and preserve symbol positions', {timeout:35000},async()=>{
  const {page,context}=await openPage('native',[';']);
  try{
   await page.locator('#voiceAutoConfirm').check();
@@ -443,7 +443,7 @@ test('6.7.3 combined symbols and numbers use actual selected character pool and 
   assert.deepEqual(page.errors,[]);
  }finally{await context.close()}
 });
-test('6.7.3 numbers and direct punctuation in manual recognition', {timeout:30000},async()=>{
+test('6.7.4 numbers and direct punctuation in manual recognition', {timeout:30000},async()=>{
  const {page,context}=await openPage('native',['3']);
  try{
   await page.locator('#voiceAutoConfirm').check();
