@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_1.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_2.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -375,6 +375,43 @@ test('6.7.1 each repetition corresponds to one complete group and Passo / Passa 
   await page.locator('#voiceEnd').click();
   await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
   assert((await page.locator('#voiceSessionScore').textContent()).includes('1/3 corrette'));
+  assert.deepEqual(page.errors,[]);
+ } finally {await context.close()}
+});
+
+test('6.7.2 Italian recognition maps kg and kilogram to NATO K without reordering the group', { timeout: 30000 }, async () => {
+ const {page,context}=await openPage('native',['K']);
+ try {
+  await page.locator('#voiceAutoConfirm').check();
+  await page.locator('#voiceGroupMode').selectOption('fixed');
+  await page.locator('#voiceGroupLength').evaluate(input=>{input.value='3';input.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#voiceStart').click();await listening(page);
+  await page.evaluate(()=>{
+    const id=window.requests.at(-1).id;
+    window.CWZVoice.onNativeEvent({id,type:'partial',alternatives:['Romeo Alfa kg']});
+  });
+  assert.deepEqual(await page.locator('#voiceCells .voice-letter-cell').evaluateAll(nodes=>nodes.map(el=>el.textContent)),['R','A','K']);
+  await nativeResult(page,'Romeo Alfa kg');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===3);
+  assert.deepEqual((await history(page)).map(row=>row.answer),['R','A','K']);
+  assert.deepEqual(await page.locator('#voiceCells .voice-letter-cell').evaluateAll(nodes=>nodes.map(el=>el.dataset.state)),['wrong','wrong','correct']);
+  await listening(page);
+  await nativeResult(page,'Kilo Chilogrammo kilogram');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===6);
+  assert.deepEqual((await history(page)).slice(3).map(row=>row.answer),['K','K','K']);
+  assert.deepEqual(page.errors,[]);
+ } finally {await context.close()}
+});
+
+test('6.7.2 isolated kg is accepted as the single NATO letter K', { timeout: 15000 }, async () => {
+ const {page,context}=await openPage('native',['K']);
+ try {
+  await page.locator('#voiceAutoConfirm').check();
+  await page.locator('#voiceStart').click();await listening(page);
+  await nativeResult(page,'kg');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===1);
+  assert.equal((await history(page))[0].answer,'K');
+  assert.equal((await history(page))[0].correct,true);
   assert.deepEqual(page.errors,[]);
  } finally {await context.close()}
 });
