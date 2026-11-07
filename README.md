@@ -58,7 +58,7 @@ Nel modo casuale la selezione evita, ove possibile, di lasciare un
 gruppo finale di una sola lettera.
 
 Si trasmette **l'intero gruppo** in Morse prima di accendere il microfono.
-Tra i caratteri si usano le pause standard di 3 unità Morse.
+Tra i caratteri si applicano le pause previste dalle Impostazioni CW, comprese\nle eventuali estensioni Farnsworth per la velocità effettiva.
 La risposta è l'intera sequenza nell'alfabeto fonetico NATO, per
 esempio: «Kilo India Passa Romeo Alfa».
 
