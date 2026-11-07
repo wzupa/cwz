@@ -1,27 +1,27 @@
 # CWZ, applicazione Android e HTML autonomo
 
-La versione in sviluppo **6.7.2** usa `CWZ_v6_7_2.html` come sorgente HTML comune.
+La versione in sviluppo **6.7.3** usa `CWZ_v6_7_3.html` come sorgente HTML comune.
 Durante la compilazione Android, Gradle copia esattamente questo file negli asset
 della WebView. Il file HTML può essere pubblicato su Aruba tramite HTTPS.
 
 ## Versioni HTML
 
-- [HTML 6.7.2](CWZ_v6_7_2.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
-- [HTML 6.7.1](CWZ_v6_7_1.html): pagina statistiche unificata, ripetizioni per gruppi e Passo/Passa.\n- [HTML 6.7.0](CWZ_v6_7_0.html): versione precedente con timer e gruppi vocali.\n- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
+- [HTML 6.7.3](CWZ_v6_7_3.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
+- [HTML 6.7.2](CWZ_v6_7_2.html): riconoscimento di «kg» per «Kilo».\n- [HTML 6.7.1](CWZ_v6_7_1.html): pagina statistiche unificata, ripetizioni per gruppi e Passo/Passa.\n- [HTML 6.7.0](CWZ_v6_7_0.html): versione precedente con timer e gruppi vocali.\n- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
 - [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
 
-Il progetto Android usa soltanto il file HTML 6.7.2. Le versioni 6.6.3 e
+Il progetto Android usa soltanto il file HTML 6.7.3. Le versioni 6.6.3 e
 6.4.4 restano separate. Lo script di build e i test del repository si
-riferiscono alla 6.7.2.
+riferiscono alla 6.7.3.
 
 ## Download e installazione
 
-- [HTML 6.7.2](CWZ_v6_7_2.html), per pubblicazione su Aruba.
-- [APK 6.7.2](downloads/CWZ-6.7.2-debug.apk), generata e pubblicata dalla
+- [HTML 6.7.3](CWZ_v6_7_3.html), per pubblicazione su Aruba.
+- [APK 6.7.3](downloads/CWZ-6.7.3-debug.apk), generata e pubblicata dalla
   [pipeline di build](.github/workflows/build-cwz-670.yml) soltanto dopo il superamento dei test.
 - [APK 6.6.3 precedente](downloads/CWZ-6.6.3-debug.apk).
 
-La 6.7.2 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
+La 6.7.3 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
 Per aggiornare direttamente un'installazione precedente serve però la **stessa chiave di firma**.
 La firma di debug della pipeline GitHub può essere diversa da quella della APK già installata:
 in tal caso Android rifiuta l'installazione come aggiornamento.
@@ -41,7 +41,7 @@ servono una chiave di release privata e una procedura di firma coerente tra vers
 - Nessun permesso Internet o accesso generale ai file richiesto.
 - Permesso microfono richiesto soltanto quando si attiva il riconoscimento vocale.
 
-## Allenamento vocale (6.7.2)\n\nIl riconoscimento vocale in italiano può rendere la parola NATO **Kilo**\ncome abbreviazione di unità di massa **kg**. CWZ accetta ora la trascrizione\n`kg` come risposta **K**, sia da sola sia in un gruppo, senza usare il\ncarattere Morse atteso per interpretare la risposta. Sono accettate\nanche le varianti vocali «chilogrammo» e «kilogram».\n\nLe **Impostazioni CW** sono condivise da tutti gli esercizi e non contengono\npiù un collegamento preferenziale verso i gruppi scritti. La pagina\n**Statistiche** raccoglie sia i risultati degli esercizi scritti, sia le\nstatistiche vocali complete e il riepilogo dell'ultima sessione vocale.\nI due storici rimangono separati per evitare duplicazioni e aggregazioni\nstatisticamente improprie.
+## Convenzioni vocali (6.7.3)\n\nLa pagina **Convenzioni vocali** è raggiungibile dal menu principale.\nDescrive l'alfabeto NATO, i numeri 0–9, i simboli Morse supportati e\ni comandi. Il parser usa gli stessi nomi, anche quando composti da più\nparole («punto e virgola», «barra obliqua», «parentesi aperta»).\nSi possono selezionare i simboli da **Impostazioni CW**, anche tramite\nil nuovo preset **Simboli** o la modalità **Simboli Morse**.\nLa selezione rimane unica e condivisa per gli esercizi scritti e vocali.\n\n## Allenamento vocale (6.7.3)\n\nIl riconoscimento vocale in italiano può rendere la parola NATO **Kilo**\ncome abbreviazione di unità di massa **kg**. CWZ accetta ora la trascrizione\n`kg` come risposta **K**, sia da sola sia in un gruppo, senza usare il\ncarattere Morse atteso per interpretare la risposta. Sono accettate\nanche le varianti vocali «chilogrammo» e «kilogram».\n\nLe **Impostazioni CW** sono condivise da tutti gli esercizi e non contengono\npiù un collegamento preferenziale verso i gruppi scritti. La pagina\n**Statistiche** raccoglie sia i risultati degli esercizi scritti, sia le\nstatistiche vocali complete e il riepilogo dell'ultima sessione vocale.\nI due storici rimangono separati per evitare duplicazioni e aggregazioni\nstatisticamente improprie.
 
 La pagina **Allenamento vocale** utilizza la selezione di caratteri,
 la velocità e il tono delle **Impostazioni CW**. L'estrazione dei
@@ -116,7 +116,7 @@ Aprire questa cartella con Android Studio, oppure impostare `JAVA_HOME` e
 ./gradlew assembleDebug lintDebug
 ```
 
-APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.2-debug.apk` e come artifact.
+APK generata: `app/build/outputs/apk/debug/app-debug.apk` (package `it.wzupa.cwz`).\nIn GitHub Actions, dopo i test, viene pubblicata come `downloads/CWZ-6.7.3-debug.apk` e come artifact.
 Android Studio e Gradle generano automaticamente la chiave di debug locale.
 Installazione via USB con debug USB abilitato: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 
@@ -159,7 +159,7 @@ errori; risposte da tastiera, correzioni vocali, aiuti, ripetizioni, interruzion
 e tentativi con problemi di riconoscimento sono esclusi. I pesi si aggiornano
 a ogni nuovo carattere e sono visibili nella tabella. Lo storico resta intatto.
 
-## Schermo durante l’allenamento vocale (6.6.3–6.7.2)
+## Schermo durante l’allenamento vocale (6.6.3–6.7.3)
 
 L’APK mantiene lo schermo acceso durante la sessione vocale e la prova microfono.
 Pausa, fine sessione, uscita dalla pagina e passaggio dell’app in secondo piano
