@@ -83,7 +83,6 @@ test('native adapter: shared characters, hidden help, commands, corrections, per
     assert.equal(await page.locator('#voiceMix').textContent(), '0% casuale · 100% adattivo');
     assert.equal(await page.locator('#voiceCode').isVisible(), false);
     assert.equal(await page.locator('#voiceCode').textContent(), '');
-    await page.getByText('Dettagli e ultime risposte', { exact: true }).click();
     await nativeResult(page, 'Kilo'); await page.locator('#voiceConfirm').click();
     let rows = await history(page);
     assert.equal(rows[0].expected, 'K'); assert.equal(rows[0].correct, true);
@@ -345,12 +344,13 @@ test('6.7.1 settings are shared, no exercise shortcut, voice statistics are in g
  try {
   await page.getByRole('link',{name:'Impostazioni CW',exact:true}).first().click();
   assert.equal(await page.getByText('Vai a Gruppi di codice').count(),0);
-  assert.equal(await page.locator('#saveDefaults').isVisible(),true);
+  await page.locator('#saveDefaults').waitFor({state:'visible'});
   await page.getByRole('link',{name:'Statistiche',exact:true}).first().click();
-  assert.equal(await page.locator('#statsSummary').isVisible(),true);
-  assert.equal(await page.locator('#voiceSummary').isVisible(),true);
+  await page.locator('#statsSummary').waitFor({state:'visible'});
+  await page.locator('#voiceSummary').waitFor({state:'visible'});
   assert.equal(await page.locator('#voiceLetters').isVisible(),true);
   await page.getByRole('link',{name:'Allenamento vocale',exact:true}).first().click();
+  await page.locator('#voiceStart').waitFor({state:'visible'});
   assert.equal(await page.locator('#voiceSummary').isVisible(),false);
   assert.deepEqual(page.errors,[]);
  }finally{await context.close()}
