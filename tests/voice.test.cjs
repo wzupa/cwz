@@ -10,7 +10,7 @@ let browser, server, url;
 before(async () => {
   server = http.createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_2.html')));
+    response.end(fs.readFileSync(path.join(__dirname, '../CWZ_v6_7_3.html')));
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   url = `http://127.0.0.1:${server.address().port}`;
@@ -414,4 +414,45 @@ test('6.7.2 isolated kg is accepted as the single NATO letter K', { timeout: 150
   assert.equal((await history(page))[0].correct,true);
   assert.deepEqual(page.errors,[]);
  } finally {await context.close()}
+});
+
+test('6.7.3 conventions page is reachable and lists letters, digits, symbols and commands',async()=>{
+ const {page,context}=await openPage('native',['K']);
+ try {
+  await page.getByRole('link',{name:'Convenzioni vocali',exact:true}).first().click();
+  await page.locator('#page-conventions h2').waitFor({state:'visible'});
+  const text=await page.locator('#page-conventions').innerText();
+  for(const phrase of ['Alfabeto NATO','Cifre 0–9','Simboli Morse supportati','Punto e virgola','Stroke','Passa / Passo / Vuoto','kg'])assert(text.toLowerCase().includes(phrase.toLowerCase()),phrase);
+  assert.deepEqual(page.errors,[]);
+ }finally{await context.close()}
+});
+test('6.7.3 combined symbols and numbers use actual selected character pool and preserve symbol positions', {timeout:35000},async()=>{
+ const {page,context}=await openPage('native',[';']);
+ try{
+  await page.locator('#voiceAutoConfirm').check();
+  await page.locator('#voiceGroupMode').selectOption('fixed');
+  await page.locator('#voiceGroupLength').evaluate(input=>{input.value='3';input.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#voiceStart').click();await listening(page);
+  await nativeResult(page,'Punto e virgola semicolon punto e virgola');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===3);
+  assert.deepEqual((await history(page)).map(x=>x.answer),[';',';',';']);
+  await listening(page);
+  await nativeResult(page,'stroke barra obliqua slash');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===6);
+  assert.deepEqual((await history(page)).slice(3).map(x=>x.answer),['/','/','/']);
+  assert.deepEqual(page.errors,[]);
+ }finally{await context.close()}
+});
+test('6.7.3 numbers and direct punctuation in manual recognition', {timeout:30000},async()=>{
+ const {page,context}=await openPage('native',['3']);
+ try{
+  await page.locator('#voiceAutoConfirm').check();
+  await page.locator('#voiceGroupMode').selectOption('fixed');
+  await page.locator('#voiceGroupLength').evaluate(input=>{input.value='3';input.dispatchEvent(new Event('input',{bubbles:true}))});
+  await page.locator('#voiceStart').click();await listening(page);
+  await nativeResult(page,'tre 3 three');
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('cwz-voice-history-v1')||'[]').length===3);
+  assert.deepEqual((await history(page)).map(x=>x.answer),['3','3','3']);
+  assert.deepEqual(page.errors,[]);
+ }finally{await context.close()}
 });
