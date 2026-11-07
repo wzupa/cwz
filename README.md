@@ -1,27 +1,34 @@
 # CWZ, applicazione Android e HTML autonomo
 
-La versione in sviluppo **6.7.3** usa `CWZ_v6_7_3.html` come sorgente HTML comune.
+La versione in sviluppo **6.7.4** usa `CWZ_v6_7_4.html` come sorgente HTML comune.
 Durante la compilazione Android, Gradle copia esattamente questo file negli asset
 della WebView. Il file HTML può essere pubblicato su Aruba tramite HTTPS.
 
 ## Versioni HTML
 
+- [HTML 6.7.4](CWZ_v6_7_4.html): risultati dell'ultima sessione visibili nell'allenamento vocale, sezioni colorate comprimibili.
+
 - [HTML 6.7.3](CWZ_v6_7_3.html): esercizi vocali singoli e a gruppi, timer invisibile e risposte a celle.
 - [HTML 6.7.2](CWZ_v6_7_2.html): riconoscimento di «kg» per «Kilo».\n- [HTML 6.7.1](CWZ_v6_7_1.html): pagina statistiche unificata, ripetizioni per gruppi e Passo/Passa.\n- [HTML 6.7.0](CWZ_v6_7_0.html): versione precedente con timer e gruppi vocali.\n- [HTML 6.6.3](CWZ_v6_6_3.html): versione vocale precedente, mantenuta senza modifiche.
 - [HTML stabile 6.4.4](CWZ_stabile_v6_4_4.html): versione precedente all’introduzione della voce, con esercizi da tastiera.
 
-Il progetto Android usa soltanto il file HTML 6.7.3. Le versioni 6.6.3 e
+Il progetto Android usa soltanto il file HTML 6.7.4. Le versioni 6.6.3 e
 6.4.4 restano separate. Lo script di build e i test del repository si
 riferiscono alla 6.7.3.
 
 ## Download e installazione
+
+La versione 6.7.4 è compilata dalla pipeline GitHub Actions, che pubblica l'APK dopo il superamento dei test.
+
+- [HTML 6.7.4](CWZ_v6_7_4.html), per Aruba.
+- [APK 6.7.4](downloads/CWZ-6.7.4-debug.apk), disponibile dopo il completamento del workflow.
 
 - [HTML 6.7.3](CWZ_v6_7_3.html), per pubblicazione su Aruba.
 - [APK 6.7.3](downloads/CWZ-6.7.3-debug.apk), generata e pubblicata dalla
   [pipeline di build](.github/workflows/build-cwz-670.yml) soltanto dopo il superamento dei test.
 - [APK 6.6.3 precedente](downloads/CWZ-6.6.3-debug.apk).
 
-La 6.7.3 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
+La 6.7.4 mantiene l'identificativo Android `it.wzupa.cwz` e una numerazione progressiva dei file, senza versioni Beta.
 Per aggiornare direttamente un'installazione precedente serve però la **stessa chiave di firma**.
 La firma di debug della pipeline GitHub può essere diversa da quella della APK già installata:
 in tal caso Android rifiuta l'installazione come aggiornamento.
