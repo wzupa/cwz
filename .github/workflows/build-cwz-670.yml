@@ -1,9 +1,9 @@
-name: Build and test CWZ 6.7.5
+name: Build and test CWZ 6.7.6
 on:
   push:
     branches: [main]
     paths:
-      - 'CWZ_v6_7_5.html'
+      - 'CWZ_v6_7_6.html'
       - 'app/**'
       - 'tests/**'
       - 'package*.json'
@@ -50,22 +50,22 @@ jobs:
       - name: Name and checksum APK
         run: |
           mkdir -p downloads
-          cp app/build/outputs/apk/debug/app-debug.apk downloads/CWZ-6.7.5-debug.apk
-          sha256sum downloads/CWZ-6.7.5-debug.apk > downloads/CWZ-6.7.5-debug.apk.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk downloads/CWZ-6.7.6-debug.apk
+          sha256sum downloads/CWZ-6.7.6-debug.apk > downloads/CWZ-6.7.6-debug.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: CWZ-6.7.5-APK
+          name: CWZ-6.7.6-APK
           path: |
-            downloads/CWZ-6.7.5-debug.apk
-            downloads/CWZ-6.7.5-debug.apk.sha256
+            downloads/CWZ-6.7.6-debug.apk
+            downloads/CWZ-6.7.6-debug.apk.sha256
           retention-days: 30
       - name: Publish the APK in the repository
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add downloads/CWZ-6.7.5-debug.apk downloads/CWZ-6.7.5-debug.apk.sha256
+          git add downloads/CWZ-6.7.6-debug.apk downloads/CWZ-6.7.6-debug.apk.sha256
           if git diff --staged --quiet; then exit 0; fi
-          git commit -m 'Publish tested CWZ 6.7.5 Android APK'
+          git commit -m 'Publish tested CWZ 6.7.6 Android APK'
           # Another workflow or documentation update may have advanced main during compilation.
           # Rebase the binary commit and retry rather than silently leaving the APK unpublished.
           for attempt in 1 2 3 4 5; do
