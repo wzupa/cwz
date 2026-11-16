@@ -8,6 +8,9 @@ on:
       - 'app/**'
       - '.github/workflows/build-cwz-670.yml'
   workflow_dispatch:
+concurrency:
+  group: cwz-678-build-main
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -60,7 +63,7 @@ jobs:
           # Rebase the binary commit and retry rather than silently leaving the APK unpublished.
           for attempt in 1 2 3 4 5; do
             git fetch origin main
-            git rebase origin/main
+            git rebase -X theirs origin/main
             if git push origin HEAD:main; then exit 0; fi
             sleep 2
           done
