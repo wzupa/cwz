@@ -33,7 +33,7 @@ jobs:
       - name: Compile Android APK (without tests)
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+          ./gradlew --no-daemon assembleDebug testDebugUnitTest
       - name: Name and checksum APK
         run: |
           mkdir -p downloads
@@ -52,6 +52,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git restore -- app/src/main/res/drawable/ic_cwz.webp
           git add downloads/CWZ-6.7.8-debug.apk downloads/CWZ-6.7.8-debug.apk.sha256 downloads/CWZ-6.7.8.html
           if git diff --staged --quiet; then exit 0; fi
           git commit -m 'Publish CWZ 6.7.8 Android APK'
