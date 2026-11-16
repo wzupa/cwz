@@ -27,6 +27,8 @@ jobs:
           test -x "$SDKMANAGER" || { echo "Android SDK manager not installed" >&2; exit 1; }
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
           "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
+      - name: Install circular CWZ Android icon
+        run: base64 --decode app/cwz-logo-base64.txt > app/src/main/res/drawable/ic_cwz.webp
       - name: Compile Android APK (without tests)
         run: |
           chmod +x gradlew
@@ -35,6 +37,7 @@ jobs:
         run: |
           mkdir -p downloads
           cp app/build/outputs/apk/debug/app-debug.apk downloads/CWZ-6.7.8-debug.apk
+          cp CWZ_v6_7_8.html downloads/CWZ-6.7.8.html
           sha256sum downloads/CWZ-6.7.8-debug.apk > downloads/CWZ-6.7.8-debug.apk.sha256
       - uses: actions/upload-artifact@v4
         with:
@@ -42,12 +45,13 @@ jobs:
           path: |
             downloads/CWZ-6.7.8-debug.apk
             downloads/CWZ-6.7.8-debug.apk.sha256
+            downloads/CWZ-6.7.8.html
           retention-days: 30
       - name: Publish the APK in the repository
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add downloads/CWZ-6.7.8-debug.apk downloads/CWZ-6.7.8-debug.apk.sha256
+          git add downloads/CWZ-6.7.8-debug.apk downloads/CWZ-6.7.8-debug.apk.sha256 downloads/CWZ-6.7.8.html
           if git diff --staged --quiet; then exit 0; fi
           git commit -m 'Publish CWZ 6.7.8 Android APK'
           # Another workflow or documentation update may have advanced main during compilation.
