@@ -3,7 +3,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'CWZ_v6_7_7.html'
+      - 'CWZ_v6_7_8.html'
+      - 'settings.gradle'
       - 'app/**'
       - '.github/workflows/build-cwz-670.yml'
   workflow_dispatch:
