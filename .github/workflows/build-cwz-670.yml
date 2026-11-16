@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'CWZ_v6_7_8.html'
+      - 'tests/group-validation-678.test.cjs'
       - 'settings.gradle'
       - 'app/**'
       - '.github/workflows/build-cwz-670.yml'
@@ -33,7 +34,9 @@ jobs:
           "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
       - name: Install circular CWZ Android icon
         run: base64 --decode app/cwz-logo-base64.txt > app/src/main/res/drawable/ic_cwz.webp
-      - name: Compile Android APK (without tests)
+      - name: Regression tests for incomplete-group validation
+        run: node --test tests/group-validation-678.test.cjs
+      - name: Compile Android APK and run Android unit tests
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug testDebugUnitTest
