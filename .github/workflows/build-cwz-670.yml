@@ -13,7 +13,7 @@ concurrency:
   group: cwz-678-build-main
   cancel-in-progress: true
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -54,3 +54,24 @@ jobs:
             downloads/CWZ-6.7.8-debug.apk.sha256
             downloads/CWZ-6.7.8.html
           retention-days: 30
+      - name: Publish built files as wzupa
+        run: |
+          # Automated release commit explicitly attributed to the repository owner.
+          git config user.name 'wzupa'
+          git config user.email '7878326+wzupa@users.noreply.github.com'
+          git restore -- app/src/main/res/drawable/ic_cwz.webp
+          git add downloads/CWZ-6.7.8-debug.apk downloads/CWZ-6.7.8-debug.apk.sha256 downloads/CWZ-6.7.8.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Publish CWZ 6.7.8 build (automated)'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            # Keep the new build artifacts when main has moved.
+            if ! git rebase -X theirs origin/main; then
+              echo 'Automatic rebase failed; refusing to overwrite repository history' >&2
+              exit 1
+            fi
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          echo 'Unable to publish built files after five attempts' >&2
+          exit 1
